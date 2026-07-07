@@ -29,7 +29,7 @@ public class CustomerRequest {
     
     private String country;
     
-    private String condicionIva;
+    private String taxCondition;
     
     private Boolean active;
 }
