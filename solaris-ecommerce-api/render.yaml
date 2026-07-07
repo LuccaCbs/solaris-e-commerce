@@ -12,7 +12,7 @@ services:
       - key: SPRING_DATASOURCE_PASSWORD
         value: npg_Gr7HjXKyoCS1
       - key: SPRING_JPA_HIBERNATE_DDL_AUTO
-        value: update
+        value: validate
       - key: SPRING_FLYWAY_ENABLED
         value: true
       - key: JWT_SECRET
