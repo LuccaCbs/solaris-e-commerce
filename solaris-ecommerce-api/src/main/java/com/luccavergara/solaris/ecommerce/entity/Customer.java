@@ -20,15 +20,11 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DocumentType documentType;
-
-    @Column(nullable = false, length = 20)
-    private String documentNumber;
-
     @Column(nullable = false)
     private String razonSocial;
+
+    @Column(nullable = false, unique = true, length = 20)
+    private String cuit;
 
     private String email;
 
@@ -36,9 +32,16 @@ public class Customer {
 
     private String address;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private CondicionIva condicionIva;
+    private String city;
+
+    private String province;
+
+    private String postalCode;
+
+    private String country;
+
+    @Column(length = 50)
+    private String taxCondition;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -57,9 +60,4 @@ public class Customer {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id")
     private User createdBy;
-
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("primary DESC, id ASC")
-    @Builder.Default
-    private List<CustomerDocument> documents = new ArrayList<>();
 }

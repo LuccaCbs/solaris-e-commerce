@@ -26,27 +26,21 @@ CREATE TABLE categories (
 -- Create customers table
 CREATE TABLE customers (
     id BIGSERIAL PRIMARY KEY,
-    document_type VARCHAR(50) NOT NULL,
-    document_number VARCHAR(20) NOT NULL,
     razon_social VARCHAR(255) NOT NULL,
+    cuit VARCHAR(20) UNIQUE NOT NULL,
     email VARCHAR(255),
     phone VARCHAR(255),
     address VARCHAR(500),
-    condicion_iva VARCHAR(50) NOT NULL,
+    city VARCHAR(255),
+    province VARCHAR(255),
+    postal_code VARCHAR(20),
+    country VARCHAR(255),
+    tax_condition VARCHAR(50),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     active BOOLEAN NOT NULL DEFAULT TRUE,
     user_id BIGINT NOT NULL REFERENCES users(id),
     created_by_user_id BIGINT REFERENCES users(id)
-);
-
--- Create customer_documents table
-CREATE TABLE customer_documents (
-    id BIGSERIAL PRIMARY KEY,
-    document_type VARCHAR(50) NOT NULL,
-    document_number VARCHAR(20) NOT NULL,
-    primary_doc BOOLEAN NOT NULL DEFAULT FALSE,
-    customer_id BIGINT NOT NULL REFERENCES customers(id) ON DELETE CASCADE
 );
 
 -- Create products table
@@ -84,5 +78,5 @@ CREATE INDEX idx_products_category ON products(category_id);
 CREATE INDEX idx_products_active ON products(active);
 CREATE INDEX idx_product_images_product ON product_images(product_id);
 CREATE INDEX idx_customers_user ON customers(user_id);
-CREATE INDEX idx_customer_documents_customer ON customer_documents(customer_id);
+CREATE INDEX idx_customers_cuit ON customers(cuit);
 CREATE INDEX idx_categories_user ON categories(user_id);

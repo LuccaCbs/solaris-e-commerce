@@ -23,7 +23,7 @@ public class ProductImage {
     private Product product;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String encryptedImageData;
+    private String encryptedData;
 
     @Column(nullable = false)
     @Builder.Default

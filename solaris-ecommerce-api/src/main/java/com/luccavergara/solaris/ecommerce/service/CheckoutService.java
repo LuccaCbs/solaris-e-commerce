@@ -117,7 +117,8 @@ public class CheckoutService {
                     .uri(solarisBillingUrl + "/payments/create")
                     .bodyValue(billingRequest)
                     .retrieve()
-                    .body(BillingResponse.class);
+                    .bodyToMono(BillingResponse.class)
+                    .block();
 
             if (billingResponse != null) {
                 paymentUrl = billingResponse.getPaymentUrl();

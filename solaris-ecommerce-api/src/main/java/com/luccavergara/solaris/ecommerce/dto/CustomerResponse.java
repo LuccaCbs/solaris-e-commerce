@@ -22,8 +22,9 @@ public class CustomerResponse {
     private String province;
     private String postalCode;
     private String country;
-    private String condicionIva;
+    private String taxCondition;
     private Boolean active;
+    private Long userId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
