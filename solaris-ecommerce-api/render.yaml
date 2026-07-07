@@ -19,3 +19,5 @@ services:
         generateValue: true
       - key: JWT_EXPIRATION
         value: 86400000
+      - key: SERVER_PORT
+        value: 8080
