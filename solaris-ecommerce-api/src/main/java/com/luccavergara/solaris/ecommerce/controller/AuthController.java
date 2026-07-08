@@ -3,6 +3,7 @@ package com.luccavergara.solaris.ecommerce.controller;
 import com.luccavergara.solaris.ecommerce.dto.AuthenticationRequest;
 import com.luccavergara.solaris.ecommerce.dto.AuthenticationResponse;
 import com.luccavergara.solaris.ecommerce.dto.RegisterRequest;
+import com.luccavergara.solaris.ecommerce.dto.ResendVerificationRequest;
 import com.luccavergara.solaris.ecommerce.service.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,20 @@ public class AuthController {
             @Valid @RequestBody AuthenticationRequest request
     ) {
         return ResponseEntity.ok(authenticationService.authenticate(request));
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<AuthenticationResponse> verifyEmail(
+            @RequestParam String token
+    ) {
+        return ResponseEntity.ok(authenticationService.verifyEmail(token));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Void> resendVerification(
+            @Valid @RequestBody ResendVerificationRequest request
+    ) {
+        authenticationService.resendVerificationEmail(request.getEmail());
+        return ResponseEntity.ok().build();
     }
 }

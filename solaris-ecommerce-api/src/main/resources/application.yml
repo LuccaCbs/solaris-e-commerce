@@ -33,6 +33,12 @@ solaris:
     url: ${SOLARIS_BILLING_URL:http://localhost:8082/api}
   cors:
     allowed-origins: ${SOLARIS_CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  frontend:
+    url: ${SOLARIS_FRONTEND_URL:http://localhost:3000}
+
+resend:
+  api-key: ${RESEND_API_KEY:}
+  from-email: ${RESEND_FROM_EMAIL:onboarding@resend.dev}
 
 logging:
   level:

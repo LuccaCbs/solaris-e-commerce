@@ -23,3 +23,9 @@ services:
         value: 8080
       - key: SOLARIS_CORS_ALLOWED_ORIGINS
         value: https://*.vercel.app,http://localhost:3000
+      - key: SOLARIS_FRONTEND_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: onboarding@resend.dev

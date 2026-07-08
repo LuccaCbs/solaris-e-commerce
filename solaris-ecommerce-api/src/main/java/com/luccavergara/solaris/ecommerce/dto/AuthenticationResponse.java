@@ -15,4 +15,6 @@ public class AuthenticationResponse {
     private String role;
     private String firstname;
     private String lastname;
+    private String message;
+    private Boolean requiresVerification;
 }
