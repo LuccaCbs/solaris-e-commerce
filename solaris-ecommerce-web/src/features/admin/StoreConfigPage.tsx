@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { storeConfigService } from '../../api/storeConfigService'
 import { Save, RefreshCw, Settings } from 'lucide-react'
 import toast from 'react-hot-toast'
+import LanguageSelector from '../../components/LanguageSelector'
 
 const StoreConfigPage = () => {
+  const { t } = useTranslation()
   const [selectedCategory, setSelectedCategory] = useState('general')
   const [formData, setFormData] = useState<Record<string, string>>({})
   const queryClient = useQueryClient()
@@ -19,10 +22,10 @@ const StoreConfigPage = () => {
       storeConfigService.updateConfig(key, { configKey: key, configValue: value }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['store-config'] })
-      toast.success('Configuración actualizada')
+      toast.success(t('admin.config.updated'))
     },
     onError: () => {
-      toast.error('Error al actualizar la configuración')
+      toast.error(t('admin.config.error'))
     },
   })
 
@@ -47,22 +50,22 @@ const StoreConfigPage = () => {
   }
 
   const categories = [
-    { id: 'general', name: 'General' },
-    { id: 'tax', name: 'Impuestos' },
-    { id: 'payment', name: 'Pagos' },
-    { id: 'shipping', name: 'Envíos' },
+    { id: 'general', name: t('admin.config.general') },
+    { id: 'tax', name: t('admin.config.tax') },
+    { id: 'payment', name: t('admin.config.payment') },
+    { id: 'shipping', name: t('admin.config.shipping') },
   ]
 
   const configLabels: Record<string, string> = {
-    'store.name': 'Nombre de la Tienda',
-    'store.email': 'Email de Contacto',
-    'store.phone': 'Teléfono',
-    'store.currency': 'Moneda',
-    'store.tax_rate': 'Tasa de Impuestos (%)',
-    'payment.mercadopago.enabled': 'MercadoPago Habilitado',
-    'payment.stripe.enabled': 'Stripe Habilitado',
-    'shipping.default_cost': 'Costo de Envío Predeterminado',
-    'shipping.free_shipping_threshold': 'Monto para Envío Gratis',
+    'store.name': t('admin.config.storeName'),
+    'store.email': t('admin.config.storeEmail'),
+    'store.phone': t('admin.config.storePhone'),
+    'store.currency': t('admin.config.storeCurrency'),
+    'store.tax_rate': t('admin.config.taxRate'),
+    'payment.mercadopago.enabled': t('admin.config.mercadopagoEnabled'),
+    'payment.stripe.enabled': t('admin.config.stripeEnabled'),
+    'shipping.default_cost': t('admin.config.defaultShippingCost'),
+    'shipping.free_shipping_threshold': t('admin.config.freeShippingThreshold'),
   }
 
   const configTypes: Record<string, 'text' | 'number' | 'boolean'> = {
@@ -82,7 +85,7 @@ const StoreConfigPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando configuración...</p>
+          <p className="text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -92,14 +95,14 @@ const StoreConfigPage = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Configuración de Tienda</h1>
-          <div className="flex gap-2">
+          <h1 className="text-2xl font-bold text-gray-900">{t('admin.config.title')}</h1>
+          <div className="flex items-center gap-2">
             <button
               onClick={handleReset}
               className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-2"
             >
               <RefreshCw className="w-4 h-4" />
-              Restablecer
+              {t('admin.config.reset')}
             </button>
             <button
               onClick={handleSave}
@@ -107,8 +110,9 @@ const StoreConfigPage = () => {
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              Guardar Cambios
+              {t('admin.config.save')}
             </button>
+            <LanguageSelector />
           </div>
         </div>
       </header>
@@ -162,8 +166,8 @@ const StoreConfigPage = () => {
                             onChange={(e) => handleInputChange(config.configKey, e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
-                            <option value="true">Sí</option>
-                            <option value="false">No</option>
+                            <option value="true">{t('common.yes')}</option>
+                            <option value="false">{t('common.no')}</option>
                           </select>
                         ) : (
                           <input
@@ -183,7 +187,7 @@ const StoreConfigPage = () => {
               ) : (
                 <div className="text-center py-12 text-gray-500">
                   <Settings className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>No hay configuraciones para esta categoría</p>
+                  <p>{t('admin.config.noConfig')}</p>
                 </div>
               )}
             </div>

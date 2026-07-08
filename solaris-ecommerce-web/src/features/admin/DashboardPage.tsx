@@ -1,19 +1,22 @@
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { dashboardService } from '../../api/dashboardService'
-import { 
-  ShoppingCart, 
-  Package, 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
+import {
+  ShoppingCart,
+  Package,
+  Users,
+  DollarSign,
+  TrendingUp,
   AlertTriangle,
   Clock,
   CheckCircle,
   XCircle,
   Loader
 } from 'lucide-react'
+import LanguageSelector from '../../components/LanguageSelector'
 
 const DashboardPage = () => {
+  const { t } = useTranslation()
   const { data: stats, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: dashboardService.getDashboardStats,
@@ -24,7 +27,7 @@ const DashboardPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando dashboard...</p>
+          <p className="text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -32,7 +35,7 @@ const DashboardPage = () => {
 
   const cards = [
     {
-      title: 'Ingresos del Mes',
+      title: t('admin.dashboard.totalOrders'),
       value: `$${stats?.monthlyRevenue?.toFixed(2) || '0.00'}`,
       icon: DollarSign,
       color: 'bg-green-500',
@@ -40,7 +43,7 @@ const DashboardPage = () => {
       textColor: 'text-green-600',
     },
     {
-      title: 'Pedidos del Mes',
+      title: t('admin.dashboard.totalOrders'),
       value: stats?.monthlyOrders || 0,
       icon: ShoppingCart,
       color: 'bg-blue-500',
@@ -48,7 +51,7 @@ const DashboardPage = () => {
       textColor: 'text-blue-600',
     },
     {
-      title: 'Productos',
+      title: t('admin.dashboard.totalProducts'),
       value: stats?.totalProducts || 0,
       icon: Package,
       color: 'bg-purple-500',
@@ -56,7 +59,7 @@ const DashboardPage = () => {
       textColor: 'text-purple-600',
     },
     {
-      title: 'Clientes',
+      title: t('admin.dashboard.totalCustomers'),
       value: stats?.totalCustomers || 0,
       icon: Users,
       color: 'bg-orange-500',
@@ -76,8 +79,9 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">{t('admin.dashboard.title')}</h1>
+          <LanguageSelector />
         </div>
       </header>
 

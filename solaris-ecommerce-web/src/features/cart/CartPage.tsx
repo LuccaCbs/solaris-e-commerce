@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { cartService } from '../../api/cartService'
 import { Plus, Minus, Trash2, ShoppingBag } from 'lucide-react'
 import toast from 'react-hot-toast'
+import LanguageSelector from '../../components/LanguageSelector'
 
 const CartPage = () => {
+  const { t } = useTranslation()
   const [cartIdentifier, setCartIdentifier] = useState<string | null>(null)
   const queryClient = useQueryClient()
 
@@ -27,10 +30,10 @@ const CartPage = () => {
       cartService.updateCartItem(undefined, cartIdentifier || undefined, itemId, quantity),
     onSuccess: (data) => {
       queryClient.setQueryData(['cart', cartIdentifier], data)
-      toast.success('Carrito actualizado')
+      toast.success(t('cart.update'))
     },
     onError: () => {
-      toast.error('Error al actualizar el carrito')
+      toast.error(t('cart.error'))
     },
   })
 
@@ -39,10 +42,10 @@ const CartPage = () => {
       cartService.removeCartItem(undefined, cartIdentifier || undefined, itemId),
     onSuccess: (data) => {
       queryClient.setQueryData(['cart', cartIdentifier], data)
-      toast.success('Producto eliminado del carrito')
+      toast.success(t('cart.remove'))
     },
     onError: () => {
-      toast.error('Error al eliminar el producto')
+      toast.error(t('cart.error'))
     },
   })
 
@@ -69,7 +72,7 @@ const CartPage = () => {
   }
 
   const handleClearCart = () => {
-    if (window.confirm('¿Estás seguro de vaciar el carrito?')) {
+    if (window.confirm(t('cart.remove'))) {
       clearCartMutation.mutate()
     }
   }
@@ -79,7 +82,7 @@ const CartPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Cargando carrito...</p>
+          <p className="mt-4 text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -90,13 +93,13 @@ const CartPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <ShoppingBag className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Tu carrito está vacío</h2>
-          <p className="text-gray-600 mb-6">Agrega productos para comenzar tu compra</p>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">{t('cart.empty')}</h2>
+          <p className="text-gray-600 mb-6">{t('cart.emptyMessage')}</p>
           <button
             onClick={() => (window.location.href = '/catalog')}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
           >
-            Ver Catálogo
+            {t('cart.continueShopping')}
           </button>
         </div>
       </div>
@@ -106,8 +109,9 @@ const CartPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Carrito de Compras</h1>
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">{t('cart.title')}</h1>
+          <LanguageSelector />
         </div>
       </header>
 
@@ -119,13 +123,13 @@ const CartPage = () => {
               <div className="p-6 border-b">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-900">
-                    {cart.totalItems} {cart.totalItems === 1 ? 'producto' : 'productos'}
+                    {cart.totalItems} {cart.totalItems === 1 ? t('cart.quantity') : t('cart.quantity')}
                   </h2>
                   <button
                     onClick={handleClearCart}
                     className="text-red-600 hover:text-red-700 text-sm font-medium"
                   >
-                    Vaciar carrito
+                    {t('cart.remove')}
                   </button>
                 </div>
               </div>
@@ -183,11 +187,11 @@ const CartPage = () => {
           {/* Resumen del pedido */}
           <div className="w-80">
             <div className="bg-white rounded-lg shadow p-6 sticky top-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Resumen del Pedido</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('cart.subtotal')}</h2>
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-gray-600">
-                  <span>Subtotal</span>
+                  <span>{t('cart.subtotal')}</span>
                   <span>${cart.totalAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
@@ -199,20 +203,20 @@ const CartPage = () => {
                   <span>$0.00</span>
                 </div>
                 <div className="border-t pt-3 flex justify-between font-semibold text-gray-900">
-                  <span>Total</span>
+                  <span>{t('cart.total')}</span>
                   <span className="text-xl">${cart.totalAmount.toFixed(2)}</span>
                 </div>
               </div>
 
               <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium">
-                Proceder al Checkout
+                {t('cart.checkout')}
               </button>
 
               <button
                 onClick={() => (window.location.href = '/catalog')}
                 className="w-full mt-3 border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition font-medium"
               >
-                Continuar Comprando
+                {t('cart.continueShopping')}
               </button>
             </div>
           </div>

@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { productService } from '../../api/productService'
 import { categoryService } from '../../api/categoryService'
 import { Product, BarcodeFormat, ProductIvaRate } from '../../types/product'
 import { Plus, Edit, Trash2, Search, Package } from 'lucide-react'
 import toast from 'react-hot-toast'
+import LanguageSelector from '../../components/LanguageSelector'
 
 const ProductManagementPage = () => {
+  const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [showModal, setShowModal] = useState(false)
@@ -53,12 +56,12 @@ const ProductManagementPage = () => {
     mutationFn: (data: any) => productService.createProduct(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
-      toast.success('Producto creado exitosamente')
+      toast.success(t('admin.product.created'))
       setShowModal(false)
       resetForm()
     },
     onError: () => {
-      toast.error('Error al crear el producto')
+      toast.error(t('admin.product.error'))
     },
   })
 
@@ -67,13 +70,13 @@ const ProductManagementPage = () => {
       productService.updateProduct(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
-      toast.success('Producto actualizado exitosamente')
+      toast.success(t('admin.product.updated'))
       setShowModal(false)
       setEditingProduct(null)
       resetForm()
     },
     onError: () => {
-      toast.error('Error al actualizar el producto')
+      toast.error(t('admin.product.error'))
     },
   })
 
@@ -81,10 +84,10 @@ const ProductManagementPage = () => {
     mutationFn: (id: number) => productService.deleteProduct(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
-      toast.success('Producto eliminado exitosamente')
+      toast.success(t('admin.product.deleted'))
     },
     onError: () => {
-      toast.error('Error al eliminar el producto')
+      toast.error(t('admin.product.error'))
     },
   })
 
@@ -129,7 +132,7 @@ const ProductManagementPage = () => {
   }
 
   const handleDelete = (id: number) => {
-    if (window.confirm('¿Estás seguro de eliminar este producto?')) {
+    if (window.confirm(t('admin.product.confirmDelete'))) {
       deleteMutation.mutate(id)
     }
   }
@@ -156,14 +159,17 @@ const ProductManagementPage = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Gestión de Productos</h1>
-          <button
-            onClick={() => { resetForm(); setShowModal(true) }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            Nuevo Producto
-          </button>
+          <h1 className="text-2xl font-bold text-gray-900">{t('admin.product.title')}</h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { resetForm(); setShowModal(true) }}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              {t('admin.product.new')}
+            </button>
+            <LanguageSelector />
+          </div>
         </div>
       </header>
 
@@ -175,7 +181,7 @@ const ProductManagementPage = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar productos..."
+                placeholder={t('admin.product.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -186,7 +192,7 @@ const ProductManagementPage = () => {
               onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Todas las categorías</option>
+              <option value="">{t('admin.product.allCategories')}</option>
               {categories?.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -200,18 +206,18 @@ const ProductManagementPage = () => {
         {isLoading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Cargando productos...</p>
+            <p className="mt-4 text-gray-600">{t('common.loading')}</p>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay productos</h3>
-            <p className="text-gray-600 mb-4">Comienza agregando tu primer producto</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('admin.product.noProducts')}</h3>
+            <p className="text-gray-600 mb-4">{t('admin.product.noProductsMessage')}</p>
             <button
               onClick={() => { resetForm(); setShowModal(true) }}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
             >
-              Agregar Producto
+              {t('admin.product.add')}
             </button>
           </div>
         ) : (
@@ -220,22 +226,22 @@ const ProductManagementPage = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Producto
+                    {t('admin.product.product')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Categoría
+                    {t('admin.product.category')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Precio
+                    {t('admin.product.price')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stock
+                    {t('admin.product.stock')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
+                    {t('admin.product.status')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
+                    {t('admin.product.actions')}
                   </th>
                 </tr>
               </thead>
@@ -264,14 +270,14 @@ const ProductManagementPage = () => {
                         {product.stockQuantity}
                       </span>
                       {product.lowStock && (
-                        <span className="ml-2 text-xs text-orange-600">(Bajo stock)</span>
+                        <span className="ml-2 text-xs text-orange-600">({t('admin.product.lowStock')})</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         product.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {product.active ? 'Activo' : 'Inactivo'}
+                        {product.active ? t('admin.product.active') : t('admin.product.inactive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -302,14 +308,14 @@ const ProductManagementPage = () => {
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b">
               <h2 className="text-xl font-semibold text-gray-900">
-                {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+                {editingProduct ? t('admin.product.edit') : t('admin.product.new')}
               </h2>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre *
+                    {t('admin.product.name')} *
                   </label>
                   <input
                     type="text"
@@ -321,7 +327,7 @@ const ProductManagementPage = () => {
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Descripción
+                    {t('admin.product.description')}
                   </label>
                   <textarea
                     value={formData.description}
@@ -332,7 +338,7 @@ const ProductManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Código de barras *
+                    {t('admin.product.barcode')} *
                   </label>
                   <input
                     type="text"
@@ -344,7 +350,7 @@ const ProductManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Formato de código
+                    {t('admin.product.barcodeFormat')}
                   </label>
                   <select
                     value={formData.barcodeFormat}
@@ -359,7 +365,7 @@ const ProductManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Precio *
+                    {t('admin.product.price')} *
                   </label>
                   <input
                     type="number"
@@ -373,7 +379,7 @@ const ProductManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Stock *
+                    {t('admin.product.stock')} *
                   </label>
                   <input
                     type="number"
@@ -386,7 +392,7 @@ const ProductManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Umbral de bajo stock
+                    {t('admin.product.lowStockThreshold')}
                   </label>
                   <input
                     type="number"
@@ -398,14 +404,14 @@ const ProductManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Categoría
+                    {t('admin.product.category')}
                   </label>
                   <select
                     value={formData.categoryId}
                     onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">Sin categoría</option>
+                    <option value="">{t('admin.product.noCategory')}</option>
                     {categories?.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.name}
@@ -415,7 +421,7 @@ const ProductManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tasa IVA
+                    {t('admin.product.ivaRate')}
                   </label>
                   <select
                     value={formData.ivaRate}
@@ -436,7 +442,7 @@ const ProductManagementPage = () => {
                     className="mr-2"
                   />
                   <label htmlFor="active" className="text-sm font-medium text-gray-700">
-                    Producto activo
+                    {t('admin.product.active')}
                   </label>
                 </div>
               </div>
@@ -446,14 +452,14 @@ const ProductManagementPage = () => {
                   onClick={() => { setShowModal(false); resetForm() }}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={createMutation.isPending || updateMutation.isPending}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
                 >
-                  {createMutation.isPending || updateMutation.isPending ? 'Guardando...' : 'Guardar'}
+                  {createMutation.isPending || updateMutation.isPending ? t('common.saving') : t('common.save')}
                 </button>
               </div>
             </form>

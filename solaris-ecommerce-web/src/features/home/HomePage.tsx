@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { productService } from '../../api/productService'
 import { categoryService } from '../../api/categoryService'
 import { Product } from '../../types/product'
 import { Search, ShoppingCart, User, Menu, X } from 'lucide-react'
+import LanguageSelector from '../../components/LanguageSelector'
 
 const HomePage = () => {
+  const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -34,7 +37,7 @@ const HomePage = () => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-gray-900">Solaris</span>
+              <span className="text-2xl font-bold text-gray-900">{t('home.title')}</span>
             </Link>
 
             {/* Search bar */}
@@ -42,7 +45,7 @@ const HomePage = () => {
               <div className="relative w-full">
                 <input
                   type="text"
-                  placeholder="Buscar productos, marcas y más..."
+                  placeholder={t('common.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -56,13 +59,13 @@ const HomePage = () => {
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-6">
               <Link to="/catalog" className="text-gray-700 hover:text-gray-900 font-medium">
-                Categorías
+                {t('nav.categories')}
               </Link>
               <Link to="/catalog" className="text-gray-700 hover:text-gray-900 font-medium">
-                Ofertas
+                {t('nav.offers')}
               </Link>
               <Link to="/catalog" className="text-gray-700 hover:text-gray-900 font-medium">
-                Historial
+                {t('nav.history')}
               </Link>
               <Link to="/cart" className="relative p-2 text-gray-700 hover:text-gray-900">
                 <ShoppingCart className="w-6 h-6" />
@@ -70,6 +73,7 @@ const HomePage = () => {
               <Link to="/login" className="flex items-center gap-2 text-gray-700 hover:text-gray-900">
                 <User className="w-6 h-6" />
               </Link>
+              <LanguageSelector />
             </nav>
 
             {/* Mobile menu button */}
@@ -86,7 +90,7 @@ const HomePage = () => {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Buscar productos..."
+                placeholder={t('home.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -102,20 +106,21 @@ const HomePage = () => {
             <nav className="md:hidden mt-4 pb-4 border-t border-gray-300 pt-4">
               <div className="flex flex-col gap-3">
                 <Link to="/catalog" className="text-gray-700 hover:text-gray-900 font-medium">
-                  Categorías
+                  {t('nav.categories')}
                 </Link>
                 <Link to="/catalog" className="text-gray-700 hover:text-gray-900 font-medium">
-                  Ofertas
+                  {t('nav.offers')}
                 </Link>
                 <Link to="/catalog" className="text-gray-700 hover:text-gray-900 font-medium">
-                  Historial
+                  {t('nav.history')}
                 </Link>
                 <Link to="/cart" className="text-gray-700 hover:text-gray-900 font-medium">
-                  Carrito
+                  {t('nav.cart')}
                 </Link>
                 <Link to="/login" className="text-gray-700 hover:text-gray-900 font-medium">
-                  Iniciar Sesión
+                  {t('nav.login')}
                 </Link>
+                <LanguageSelector />
               </div>
             </nav>
           )}
@@ -134,7 +139,7 @@ const HomePage = () => {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Todo
+              {t('home.all')}
             </button>
             {categories?.map((category) => (
               <button
@@ -158,16 +163,16 @@ const HomePage = () => {
         {isLoading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Cargando productos...</p>
+            <p className="mt-4 text-gray-600">{t('catalog.loadingProducts')}</p>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600">No se encontraron productos</p>
+            <p className="text-gray-600">{t('catalog.noProducts')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} t={t} />
             ))}
           </div>
         )}
@@ -176,7 +181,7 @@ const HomePage = () => {
   )
 }
 
-const ProductCard = ({ product }: { product: Product }) => {
+const ProductCard = ({ product, t }: { product: Product; t: any }) => {
   return (
     <Link to={`/catalog`} className="block">
       <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer">
@@ -194,10 +199,10 @@ const ProductCard = ({ product }: { product: Product }) => {
             </span>
             {product.stockQuantity > 0 ? (
               <span className="text-xs text-green-600">
-                {product.stockQuantity} disponibles
+                {product.stockQuantity} {t('home.available')}
               </span>
             ) : (
-              <span className="text-xs text-red-600">Agotado</span>
+              <span className="text-xs text-red-600">{t('home.outOfStock')}</span>
             )}
           </div>
         </div>

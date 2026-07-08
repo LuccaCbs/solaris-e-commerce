@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { customerService } from '../../api/customerService'
 import { Customer } from '../../types/customer'
 import { Plus, Edit, Trash2, Search, Users } from 'lucide-react'
 import toast from 'react-hot-toast'
+import LanguageSelector from '../../components/LanguageSelector'
 
 const CustomerManagementPage = () => {
+  const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
@@ -33,12 +36,12 @@ const CustomerManagementPage = () => {
     mutationFn: (data: any) => customerService.createCustomer(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] })
-      toast.success('Cliente creado exitosamente')
+      toast.success(t('admin.customer.created'))
       setShowModal(false)
       resetForm()
     },
     onError: () => {
-      toast.error('Error al crear el cliente')
+      toast.error(t('admin.customer.error'))
     },
   })
 
@@ -47,13 +50,13 @@ const CustomerManagementPage = () => {
       customerService.updateCustomer(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] })
-      toast.success('Cliente actualizado exitosamente')
+      toast.success(t('admin.customer.updated'))
       setShowModal(false)
       setEditingCustomer(null)
       resetForm()
     },
     onError: () => {
-      toast.error('Error al actualizar el cliente')
+      toast.error(t('admin.customer.error'))
     },
   })
 
@@ -61,10 +64,10 @@ const CustomerManagementPage = () => {
     mutationFn: (id: number) => customerService.deleteCustomer(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] })
-      toast.success('Cliente eliminado exitosamente')
+      toast.success(t('admin.customer.deleted'))
     },
     onError: () => {
-      toast.error('Error al eliminar el cliente')
+      toast.error(t('admin.customer.error'))
     },
   })
 
@@ -111,7 +114,7 @@ const CustomerManagementPage = () => {
   }
 
   const handleDelete = (id: number) => {
-    if (window.confirm('¿Estás seguro de eliminar este cliente?')) {
+    if (window.confirm(t('admin.customer.confirmDelete'))) {
       deleteMutation.mutate(id)
     }
   }
@@ -139,14 +142,17 @@ const CustomerManagementPage = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Gestión de Clientes</h1>
-          <button
-            onClick={() => { resetForm(); setShowModal(true) }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            Nuevo Cliente
-          </button>
+          <h1 className="text-2xl font-bold text-gray-900">{t('admin.customer.title')}</h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { resetForm(); setShowModal(true) }}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              {t('admin.customer.new')}
+            </button>
+            <LanguageSelector />
+          </div>
         </div>
       </header>
 
@@ -157,7 +163,7 @@ const CustomerManagementPage = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Buscar clientes por nombre, CUIT o email..."
+              placeholder={t('admin.customer.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -169,18 +175,18 @@ const CustomerManagementPage = () => {
         {isLoading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Cargando clientes...</p>
+            <p className="mt-4 text-gray-600">{t('common.loading')}</p>
           </div>
         ) : filteredCustomers.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay clientes</h3>
-            <p className="text-gray-600 mb-4">Comienza agregando tu primer cliente</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('admin.customer.noCustomers')}</h3>
+            <p className="text-gray-600 mb-4">{t('admin.customer.noCustomersMessage')}</p>
             <button
               onClick={() => { resetForm(); setShowModal(true) }}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
             >
-              Agregar Cliente
+              {t('admin.customer.add')}
             </button>
           </div>
         ) : (
@@ -189,22 +195,22 @@ const CustomerManagementPage = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cliente
+                    {t('admin.customer.customer')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    CUIT
+                    {t('admin.customer.cuit')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
+                    {t('admin.customer.email')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ubicación
+                    {t('admin.customer.location')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
+                    {t('admin.customer.status')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
+                    {t('admin.customer.actions')}
                   </th>
                 </tr>
               </thead>
@@ -235,7 +241,7 @@ const CustomerManagementPage = () => {
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         customer.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {customer.active ? 'Activo' : 'Inactivo'}
+                        {customer.active ? t('admin.customer.active') : t('admin.customer.inactive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -266,14 +272,14 @@ const CustomerManagementPage = () => {
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b">
               <h2 className="text-xl font-semibold text-gray-900">
-                {editingCustomer ? 'Editar Cliente' : 'Nuevo Cliente'}
+                {editingCustomer ? t('admin.customer.edit') : t('admin.customer.new')}
               </h2>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Razón Social *
+                    {t('admin.customer.razonSocial')} *
                   </label>
                   <input
                     type="text"
@@ -285,7 +291,7 @@ const CustomerManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    CUIT *
+                    {t('admin.customer.cuit')} *
                   </label>
                   <input
                     type="text"
@@ -297,7 +303,7 @@ const CustomerManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
+                    {t('admin.customer.email')}
                   </label>
                   <input
                     type="email"
@@ -308,7 +314,7 @@ const CustomerManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Teléfono
+                    {t('admin.customer.phone')}
                   </label>
                   <input
                     type="text"
@@ -319,7 +325,7 @@ const CustomerManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Condición Fiscal
+                    {t('admin.customer.taxCondition')}
                   </label>
                   <select
                     value={formData.taxCondition}
@@ -335,7 +341,7 @@ const CustomerManagementPage = () => {
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Dirección
+                    {t('admin.customer.address')}
                   </label>
                   <input
                     type="text"
@@ -346,7 +352,7 @@ const CustomerManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Ciudad
+                    {t('admin.customer.city')}
                   </label>
                   <input
                     type="text"
@@ -357,7 +363,7 @@ const CustomerManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Provincia
+                    {t('admin.customer.province')}
                   </label>
                   <input
                     type="text"
@@ -368,7 +374,7 @@ const CustomerManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Código Postal
+                    {t('admin.customer.postalCode')}
                   </label>
                   <input
                     type="text"
@@ -379,7 +385,7 @@ const CustomerManagementPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    País
+                    {t('admin.customer.country')}
                   </label>
                   <input
                     type="text"
@@ -397,7 +403,7 @@ const CustomerManagementPage = () => {
                     className="mr-2"
                   />
                   <label htmlFor="active" className="text-sm font-medium text-gray-700">
-                    Cliente activo
+                    {t('admin.customer.active')}
                   </label>
                 </div>
               </div>
@@ -407,14 +413,14 @@ const CustomerManagementPage = () => {
                   onClick={() => { setShowModal(false); resetForm() }}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={createMutation.isPending || updateMutation.isPending}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
                 >
-                  {createMutation.isPending || updateMutation.isPending ? 'Guardando...' : 'Guardar'}
+                  {createMutation.isPending || updateMutation.isPending ? t('common.saving') : t('common.save')}
                 </button>
               </div>
             </form>
