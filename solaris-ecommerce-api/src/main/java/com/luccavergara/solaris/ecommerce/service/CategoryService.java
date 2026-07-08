@@ -3,7 +3,9 @@ package com.luccavergara.solaris.ecommerce.service;
 import com.luccavergara.solaris.ecommerce.dto.CategoryRequest;
 import com.luccavergara.solaris.ecommerce.dto.CategoryResponse;
 import com.luccavergara.solaris.ecommerce.entity.Category;
+import com.luccavergara.solaris.ecommerce.entity.User;
 import com.luccavergara.solaris.ecommerce.repository.CategoryRepository;
+import com.luccavergara.solaris.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,12 +20,18 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
-    public CategoryResponse createCategory(CategoryRequest request) {
+    public CategoryResponse createCategory(CategoryRequest request, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         Category category = Category.builder()
                 .name(request.getName())
                 .description(request.getDescription())
                 .systemCategory(request.getSystemCategory())
+                .user(user)
+                .createdBy(user)
                 .createdAt(LocalDateTime.now())
                 .build();
 

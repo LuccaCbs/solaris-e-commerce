@@ -5,8 +5,10 @@ import com.luccavergara.solaris.ecommerce.dto.ProductResponse;
 import com.luccavergara.solaris.ecommerce.entity.Category;
 import com.luccavergara.solaris.ecommerce.entity.Product;
 import com.luccavergara.solaris.ecommerce.entity.ProductIvaRate;
+import com.luccavergara.solaris.ecommerce.entity.User;
 import com.luccavergara.solaris.ecommerce.repository.CategoryRepository;
 import com.luccavergara.solaris.ecommerce.repository.ProductRepository;
+import com.luccavergara.solaris.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,11 +27,15 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
     public ProductResponse createProduct(ProductRequest request, Long userId) {
         if (productRepository.findByBarcode(request.getBarcode()).isPresent()) {
             throw new RuntimeException("Product with this barcode already exists");
         }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Category category = null;
         if (request.getCategoryId() != null) {
@@ -48,6 +54,8 @@ public class ProductService {
                 .category(category)
                 .ivaRate(request.getIvaRate())
                 .active(request.getActive())
+                .user(user)
+                .createdBy(user)
                 .createdAt(LocalDateTime.now())
                 .build();
 

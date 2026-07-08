@@ -30,12 +30,16 @@ public class AuthenticationService {
     @Value("${solaris.frontend.url}")
     private String frontendUrl;
 
+    @Value("${resend.api-key:}")
+    private String resendApiKey;
+
     public AuthenticationResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Ya existe una cuenta registrada con ese correo electrónico");
         }
 
-        String verificationToken = UUID.randomUUID().toString();
+        boolean skipEmailVerification = resendApiKey == null || resendApiKey.isBlank();
+        String verificationToken = skipEmailVerification ? null : UUID.randomUUID().toString();
 
         var user = User.builder()
                 .firstname(request.getFirstname())
@@ -43,22 +47,38 @@ public class AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.CUSTOMER)
-                .emailVerified(false)
+                .emailVerified(skipEmailVerification)
                 .platformOperator(false)
                 .verificationToken(verificationToken)
-                .verificationTokenExpiry(LocalDateTime.now().plusHours(24))
+                .verificationTokenExpiry(skipEmailVerification ? null : LocalDateTime.now().plusHours(24))
                 .build();
 
         userRepository.save(user);
+
+        if (skipEmailVerification) {
+            var jwtToken = jwtService.generateToken(user.getEmail());
+            return AuthenticationResponse.builder()
+                    .id(user.getId())
+                    .token(jwtToken)
+                    .email(user.getEmail())
+                    .role(user.getRole().name())
+                    .firstname(user.getFirstname())
+                    .lastname(user.getLastname())
+                    .requiresVerification(false)
+                    .message("Registro exitoso. Tu cuenta fue activada automáticamente (modo desarrollo).")
+                    .build();
+        }
 
         String verificationUrl = frontendUrl + "/verify-email?token=" + verificationToken;
         emailService.sendVerificationEmail(user.getEmail(), user.getFirstname(), verificationUrl);
 
         return AuthenticationResponse.builder()
+                .id(user.getId())
                 .email(user.getEmail())
                 .firstname(user.getFirstname())
                 .lastname(user.getLastname())
                 .requiresVerification(true)
+                .verificationUrl(verificationUrl)
                 .message("Registro exitoso. Revisa tu correo para verificar tu cuenta.")
                 .build();
     }
@@ -83,6 +103,7 @@ public class AuthenticationService {
         var jwtToken = jwtService.generateToken(user.getEmail());
 
         return AuthenticationResponse.builder()
+                .id(user.getId())
                 .token(jwtToken)
                 .email(user.getEmail())
                 .role(user.getRole().name())
@@ -123,6 +144,7 @@ public class AuthenticationService {
         var jwtToken = jwtService.generateToken(user.getEmail());
 
         return AuthenticationResponse.builder()
+                .id(user.getId())
                 .token(jwtToken)
                 .email(user.getEmail())
                 .role(user.getRole() != null ? user.getRole().name() : null)

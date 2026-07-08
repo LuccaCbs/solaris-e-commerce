@@ -3,6 +3,7 @@ package com.luccavergara.solaris.ecommerce.controller;
 import com.luccavergara.solaris.ecommerce.dto.ProductRequest;
 import com.luccavergara.solaris.ecommerce.dto.ProductResponse;
 import com.luccavergara.solaris.ecommerce.entity.ProductIvaRate;
+import com.luccavergara.solaris.ecommerce.entity.User;
 import com.luccavergara.solaris.ecommerce.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -28,9 +30,9 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
     public ResponseEntity<ProductResponse> createProduct(
             @Valid @RequestBody ProductRequest request,
-            @RequestHeader("X-User-Id") Long userId
+            @AuthenticationPrincipal User user
     ) {
-        return ResponseEntity.ok(productService.createProduct(request, userId));
+        return ResponseEntity.ok(productService.createProduct(request, user.getId()));
     }
 
     @PutMapping("/{id}")

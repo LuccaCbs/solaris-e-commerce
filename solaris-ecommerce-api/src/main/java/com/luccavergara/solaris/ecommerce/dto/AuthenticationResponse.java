@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthenticationResponse {
+    private Long id;
     private String token;
     private String email;
     private String role;
@@ -17,4 +18,5 @@ public class AuthenticationResponse {
     private String lastname;
     private String message;
     private Boolean requiresVerification;
+    private String verificationUrl;
 }

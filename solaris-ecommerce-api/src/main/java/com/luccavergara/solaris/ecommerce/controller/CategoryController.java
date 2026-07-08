@@ -2,11 +2,13 @@ package com.luccavergara.solaris.ecommerce.controller;
 
 import com.luccavergara.solaris.ecommerce.dto.CategoryRequest;
 import com.luccavergara.solaris.ecommerce.dto.CategoryResponse;
+import com.luccavergara.solaris.ecommerce.entity.User;
 import com.luccavergara.solaris.ecommerce.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +22,11 @@ public class CategoryController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
-    public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest request) {
-        return ResponseEntity.ok(categoryService.createCategory(request));
+    public ResponseEntity<CategoryResponse> createCategory(
+            @Valid @RequestBody CategoryRequest request,
+            @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity.ok(categoryService.createCategory(request, user.getId()));
     }
 
     @PutMapping("/{id}")

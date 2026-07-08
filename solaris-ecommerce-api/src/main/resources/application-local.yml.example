@@ -1,0 +1,11 @@
+# Copia este archivo como application-local.yml y ajusta tus credenciales locales.
+# application-local.yml está en .gitignore y NO se sobrescribe al correr mvn spring-boot:run.
+#
+# IMPORTANTE: edita src/main/resources/application-local.yml
+# NO edites archivos dentro de target/ (Maven los regenera en cada build).
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/solaris_ecommerce
+    username: postgres
+    password: tu-password-aqui
