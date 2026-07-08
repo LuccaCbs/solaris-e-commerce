@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Mail, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { authService } from '../../api/authService'
@@ -9,6 +9,7 @@ import LanguageSelector from '../../components/LanguageSelector'
 
 const RegisterPage = () => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     firstname: '',
     lastname: '',
@@ -17,11 +18,22 @@ const RegisterPage = () => {
     confirmPassword: '',
   })
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null)
+  const [verificationUrl, setVerificationUrl] = useState<string | null>(null)
 
   const registerMutation = useMutation({
     mutationFn: authService.register,
     onSuccess: (data) => {
+      if (data.token) {
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data))
+        toast.success(data.message || t('register.success'))
+        navigate(['ADMIN', 'STAFF'].includes(data.role || '') ? '/admin' : '/')
+        return
+      }
       setRegisteredEmail(data.email)
+      if (data.verificationUrl) {
+        setVerificationUrl(data.verificationUrl)
+      }
     },
     onError: (error: any) => {
       const message = error?.response?.data?.message || t('register.error')
@@ -63,6 +75,13 @@ const RegisterPage = () => {
             <Mail className="w-4 h-4" />
             {registeredEmail}
           </p>
+          {verificationUrl && (
+            <p className="text-sm text-gray-500 mb-4 break-all">
+              <a href={verificationUrl} className="text-blue-600 hover:underline">
+                {verificationUrl}
+              </a>
+            </p>
+          )}
           <Link to="/login" className="text-blue-600 hover:underline font-medium">
             {t('register.login')}
           </Link>

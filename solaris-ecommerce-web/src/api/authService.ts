@@ -13,6 +13,7 @@ export type LoginData = {
 }
 
 export type AuthResponse = {
+  id?: number
   token?: string
   email: string
   role?: string
@@ -20,6 +21,7 @@ export type AuthResponse = {
   lastname: string
   message?: string
   requiresVerification?: boolean
+  verificationUrl?: string
 }
 
 export const authService = {

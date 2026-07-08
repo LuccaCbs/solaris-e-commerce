@@ -20,7 +20,7 @@ const LoginPage = () => {
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data))
         toast.success(t('login.success'))
-        navigate(data.role === 'ADMIN' ? '/admin' : '/')
+        navigate(['ADMIN', 'STAFF'].includes(data.role || '') ? '/admin' : '/')
       }
     },
     onError: (error: any) => {

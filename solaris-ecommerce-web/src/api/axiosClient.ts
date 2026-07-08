@@ -14,6 +14,17 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    const userJson = localStorage.getItem('user')
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson)
+        if (user?.id) {
+          config.headers['X-User-Id'] = user.id
+        }
+      } catch {
+        // ignore invalid user data
+      }
+    }
     return config
   },
   (error) => {
@@ -26,8 +37,15 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
+      const publicPaths = ['/', '/catalog', '/login', '/register', '/verify-email']
+      const isPublicPath = publicPaths.some(
+        (path) => window.location.pathname === path || window.location.pathname.startsWith('/catalog')
+      )
+      if (!isPublicPath) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }

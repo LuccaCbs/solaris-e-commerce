@@ -30,7 +30,7 @@ const VerifyEmailPage = () => {
           localStorage.setItem('user', JSON.stringify(data))
         }
         setTimeout(() => {
-          navigate(data.role === 'ADMIN' ? '/admin' : '/')
+          navigate(['ADMIN', 'STAFF'].includes(data.role || '') ? '/admin' : '/')
         }, 2500)
       })
       .catch((error) => {
