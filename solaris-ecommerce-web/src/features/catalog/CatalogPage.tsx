@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import { productService } from '../../api/productService'
 import { categoryService } from '../../api/categoryService'
 import { Product } from '../../types/product'
-import { Category } from '../../types/category'
 import { Search, Filter, ShoppingCart } from 'lucide-react'
 
 const CatalogPage = () => {

@@ -15,6 +15,16 @@ export type Product = {
   active?: boolean
   ivaRate: ProductIvaRate
   categoryId?: number
+  categoryName?: string
+  lowStock?: boolean
+}
+
+export type Page<T> = {
+  content: T[]
+  totalElements: number
+  totalPages: number
+  number: number
+  size: number
 }
 
 export const PRODUCT_IVA_RATES: ProductIvaRate[] = [

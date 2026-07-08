@@ -1,5 +1,5 @@
 import apiClient from './axiosClient'
-import { Product } from '../types/product'
+import { Product, Page } from '../types/product'
 
 export const productService = {
   getAllProducts: async (): Promise<Product[]> => {
@@ -51,7 +51,7 @@ export const productService = {
     maxPrice?: number
     page?: number
     size?: number
-  }) => {
+  }): Promise<Page<Product>> => {
     const response = await apiClient.get('/products/filter', { params: filters })
     return response.data
   },

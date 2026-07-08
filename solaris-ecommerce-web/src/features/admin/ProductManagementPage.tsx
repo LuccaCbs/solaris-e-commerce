@@ -2,9 +2,8 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { productService } from '../../api/productService'
 import { categoryService } from '../../api/categoryService'
-import { Product } from '../../types/product'
-import { Category } from '../../types/category'
-import { Plus, Edit, Trash2, Search, Filter, Package } from 'lucide-react'
+import { Product, BarcodeFormat, ProductIvaRate } from '../../types/product'
+import { Plus, Edit, Trash2, Search, Package } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const ProductManagementPage = () => {
@@ -12,16 +11,27 @@ const ProductManagementPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string
+    description: string
+    barcode: string
+    barcodeFormat: BarcodeFormat
+    price: string
+    stockQuantity: string
+    lowStockThreshold: string
+    categoryId: string
+    ivaRate: ProductIvaRate
+    active: boolean
+  }>({
     name: '',
     description: '',
     barcode: '',
-    barcodeFormat: 'CODE_128' as const,
+    barcodeFormat: 'CODE_128',
     price: '',
     stockQuantity: '',
     lowStockThreshold: '',
     categoryId: '',
-    ivaRate: 'GENERAL_21' as const,
+    ivaRate: 'GENERAL_21',
     active: true,
   })
   const queryClient = useQueryClient()
