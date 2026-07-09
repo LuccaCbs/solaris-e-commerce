@@ -33,7 +33,7 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
     <header className="bg-yellow-400 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
-          <Link to={admin ? '/admin' : '/'} className="flex-shrink-0">
+          <Link to="/" className="flex-shrink-0">
             <span className="text-2xl font-bold text-gray-900">{t('home.title')}</span>
           </Link>
 
@@ -55,28 +55,16 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
           )}
 
           <nav className="hidden md:flex items-center gap-4">
+            <Link to="/catalog" className="text-gray-800 hover:text-gray-900 font-medium text-sm">
+              {t('nav.catalog')}
+            </Link>
+            <Link to="/" className="text-gray-800 hover:text-gray-900 font-medium text-sm">
+              {t('nav.featured')}
+            </Link>
             {admin && (
-              <>
-                <Link to="/admin/products" className="text-gray-800 hover:text-gray-900 font-medium text-sm">
-                  {t('nav.products')}
-                </Link>
-                <Link to="/admin/categories" className="text-gray-800 hover:text-gray-900 font-medium text-sm">
-                  {t('nav.categories')}
-                </Link>
-                <Link to="/admin/featured" className="text-gray-800 hover:text-gray-900 font-medium text-sm">
-                  {t('nav.featured')}
-                </Link>
-              </>
-            )}
-            {!admin && (
-              <>
-                <Link to="/catalog" className="text-gray-800 hover:text-gray-900 font-medium text-sm">
-                  {t('nav.categories')}
-                </Link>
-                <Link to="/catalog" className="text-gray-800 hover:text-gray-900 font-medium text-sm">
-                  {t('nav.offers')}
-                </Link>
-              </>
+              <Link to="/admin" className="text-gray-800 hover:text-gray-900 font-medium text-sm border-l border-yellow-600 pl-4">
+                {t('nav.admin')}
+              </Link>
             )}
             <Link to="/cart" className="p-2 text-gray-800 hover:text-gray-900">
               <ShoppingCart className="w-6 h-6" />
@@ -141,13 +129,9 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
 
         {mobileMenuOpen && (
           <nav className="md:hidden mt-4 pb-4 border-t border-yellow-500 pt-4 flex flex-col gap-2">
-            {admin && (
-              <>
-                <Link to="/admin/products" className="text-gray-800 font-medium">{t('nav.products')}</Link>
-                <Link to="/admin/categories" className="text-gray-800 font-medium">{t('nav.categories')}</Link>
-                <Link to="/admin/featured" className="text-gray-800 font-medium">{t('nav.featured')}</Link>
-              </>
-            )}
+            <Link to="/catalog" className="text-gray-800 font-medium">{t('nav.catalog')}</Link>
+            <Link to="/" className="text-gray-800 font-medium">{t('nav.featured')}</Link>
+            {admin && <Link to="/admin" className="text-gray-800 font-medium">{t('nav.admin')}</Link>}
             <Link to="/cart" className="text-gray-800 font-medium">{t('nav.cart')}</Link>
             {user ? (
               <>

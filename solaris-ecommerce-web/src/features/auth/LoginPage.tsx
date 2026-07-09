@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, ArrowLeft } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { authService } from '../../api/authService'
 import LanguageSelector from '../../components/LanguageSelector'
@@ -50,7 +50,11 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between items-center mb-4">
+          <Link to="/" className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
+            <ArrowLeft className="w-4 h-4" />
+            {t('common.backToHome')}
+          </Link>
           <LanguageSelector />
         </div>
         <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">

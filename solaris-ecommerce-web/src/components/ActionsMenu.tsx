@@ -16,15 +16,21 @@ type ActionsMenuProps = {
 const ActionsMenu = ({ items }: ActionsMenuProps) => {
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState({ top: 0, left: 0 })
+  const menuRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const visibleItems = items.filter((item) => !item.hidden)
 
   useEffect(() => {
     if (!open) return
     const handleClickOutside = (e: MouseEvent) => {
-      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
-        setOpen(false)
+      const target = e.target as Node
+      if (
+        buttonRef.current?.contains(target) ||
+        menuRef.current?.contains(target)
+      ) {
+        return
       }
+      setOpen(false)
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -51,7 +57,8 @@ const ActionsMenu = ({ items }: ActionsMenuProps) => {
       {open &&
         createPortal(
           <div
-            className="fixed z-50 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-1"
+            ref={menuRef}
+            className="fixed z-[60] w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-1"
             style={{ top: position.top, left: position.left }}
           >
             {visibleItems.map((item) => (

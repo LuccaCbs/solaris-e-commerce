@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Plus, Package } from 'lucide-react'
+import { Plus, Package, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ActionsMenu from '../../components/ActionsMenu'
+import ImageUploadField from '../../components/ImageUploadField'
+import ProductImageSlider from '../../components/ProductImageSlider'
+import { useDebounce } from '../../hooks/useDebounce'
 import { productService } from '../../api/productService'
 import { categoryService } from '../../api/categoryService'
-import { productImageService, fileToBase64, toImageSrc } from '../../api/productImageService'
+import { productImageService, fileToBase64, ProductImage, toImageSrc } from '../../api/productImageService'
 import { Product } from '../../types/product'
 import { Category } from '../../types/category'
 
@@ -32,15 +35,23 @@ const emptyForm: ProductFormData = {
   lowStockThreshold: '',
 }
 
+const uploadImages = async (productId: number, files: File[]) => {
+  for (let i = 0; i < files.length; i++) {
+    const base64 = await fileToBase64(files[i])
+    await productImageService.upload(productId, base64, i)
+  }
+}
+
 const ProductManagementPage = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
+  const debouncedSearch = useDebounce(searchTerm, 300)
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view' | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [formData, setFormData] = useState<ProductFormData>(emptyForm)
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [previewImages, setPreviewImages] = useState<string[]>([])
+  const [pendingFiles, setPendingFiles] = useState<File[]>([])
+  const [existingImages, setExistingImages] = useState<ProductImage[]>([])
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
@@ -52,9 +63,13 @@ const ProductManagementPage = () => {
     queryFn: categoryService.getGeneralCategory,
   })
 
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['manage-products', searchTerm],
-    queryFn: () => productService.getManageProducts({ search: searchTerm || undefined, size: 100 }),
+  const { data: products, isLoading, isError } = useQuery({
+    queryKey: ['manage-products', debouncedSearch],
+    queryFn: () =>
+      productService.getManageProducts({
+        search: debouncedSearch.trim() || undefined,
+        size: 100,
+      }),
   })
 
   useEffect(() => {
@@ -63,12 +78,22 @@ const ProductManagementPage = () => {
     }
   }, [generalCategory, modalMode, formData.categoryId])
 
+  const loadProductImages = async (productId: number) => {
+    try {
+      const images = await productImageService.getByProduct(productId)
+      setExistingImages(images)
+      return images
+    } catch {
+      setExistingImages([])
+      return []
+    }
+  }
+
   const createMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: Record<string, unknown>) => {
       const product = await productService.createProduct(data)
-      if (imageFile) {
-        const base64 = await fileToBase64(imageFile)
-        await productImageService.upload(product.id, base64)
+      if (pendingFiles.length > 0) {
+        await uploadImages(product.id, pendingFiles)
       }
       return product
     },
@@ -77,15 +102,15 @@ const ProductManagementPage = () => {
       toast.success(t('admin.product.created'))
       closeModal()
     },
-    onError: (error: any) => toast.error(error?.response?.data?.message || t('admin.product.error')),
+    onError: (error: { response?: { data?: { message?: string } } }) =>
+      toast.error(error?.response?.data?.message || t('admin.product.error')),
   })
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Record<string, unknown> }) => {
       const product = await productService.updateProduct(id, data)
-      if (imageFile) {
-        const base64 = await fileToBase64(imageFile)
-        await productImageService.upload(product.id, base64)
+      if (pendingFiles.length > 0) {
+        await uploadImages(product.id, pendingFiles)
       }
       return product
     },
@@ -94,15 +119,28 @@ const ProductManagementPage = () => {
       toast.success(t('admin.product.updated'))
       closeModal()
     },
-    onError: (error: any) => toast.error(error?.response?.data?.message || t('admin.product.error')),
+    onError: (error: { response?: { data?: { message?: string } } }) =>
+      toast.error(error?.response?.data?.message || t('admin.product.error')),
   })
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, active }: { id: number; active: boolean }) =>
       productService.toggleStatus(id, active),
-    onSuccess: () => {
+    onSuccess: (_, { active }) => {
       queryClient.invalidateQueries({ queryKey: ['manage-products'] })
-      toast.success(t('admin.product.statusUpdated'))
+      toast.success(
+        active ? t('admin.product.enabled') : t('admin.product.disabled')
+      )
+    },
+    onError: () => toast.error(t('admin.product.error')),
+  })
+
+  const deleteImageMutation = useMutation({
+    mutationFn: ({ productId, imageId }: { productId: number; imageId: number }) =>
+      productImageService.remove(productId, imageId),
+    onSuccess: () => {
+      if (selectedProduct) loadProductImages(selectedProduct.id)
+      toast.success(t('admin.product.imageRemoved'))
     },
     onError: () => toast.error(t('admin.product.error')),
   })
@@ -113,8 +151,8 @@ const ProductManagementPage = () => {
       categoryId: generalCategory ? String(generalCategory.id) : '',
     })
     setSelectedProduct(null)
-    setImageFile(null)
-    setPreviewImages([])
+    setPendingFiles([])
+    setExistingImages([])
     setModalMode('create')
   }
 
@@ -126,36 +164,35 @@ const ProductManagementPage = () => {
       barcode: product.barcode,
       price: product.price.toString(),
       stockQuantity: product.stockQuantity.toString(),
-      categoryId: product.categoryId?.toString() || '',
+      categoryId: product.categoryId?.toString() || String(generalCategory?.id || ''),
       ivaRate: product.ivaRate,
       lowStockThreshold: product.lowStockThreshold?.toString() || '',
     })
-    setImageFile(null)
-    try {
-      const images = await productImageService.getByProduct(product.id)
-      setPreviewImages(images.map((img) => toImageSrc(img.imageData)))
-    } catch {
-      setPreviewImages([])
-    }
+    setPendingFiles([])
+    await loadProductImages(product.id)
     setModalMode('edit')
   }
 
   const openView = async (product: Product) => {
     setSelectedProduct(product)
-    try {
-      const images = await productImageService.getByProduct(product.id)
-      setPreviewImages(images.map((img) => toImageSrc(img.imageData)))
-    } catch {
-      setPreviewImages([])
-    }
+    await loadProductImages(product.id)
     setModalMode('view')
+  }
+
+  const handleDisable = (product: Product) => {
+    const message = product.active
+      ? t('admin.product.confirmDisable', { name: product.name })
+      : t('admin.product.confirmEnable', { name: product.name })
+    if (window.confirm(message)) {
+      toggleMutation.mutate({ id: product.id, active: !product.active })
+    }
   }
 
   const closeModal = () => {
     setModalMode(null)
     setSelectedProduct(null)
-    setImageFile(null)
-    setPreviewImages([])
+    setPendingFiles([])
+    setExistingImages([])
     setFormData(emptyForm)
   }
 
@@ -185,7 +222,7 @@ const ProductManagementPage = () => {
 
   return (
     <>
-    <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">{t('admin.product.title')}</h1>
           <button
@@ -209,10 +246,14 @@ const ProductManagementPage = () => {
 
         {isLoading ? (
           <div className="text-center py-12">{t('common.loading')}</div>
+        ) : isError ? (
+          <div className="text-center py-12 text-red-600">{t('admin.product.error')}</div>
         ) : productList.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">{t('admin.product.noProducts')}</p>
+            <p className="text-gray-600">
+              {debouncedSearch ? t('admin.product.noResults') : t('admin.product.noProducts')}
+            </p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -249,7 +290,8 @@ const ProductManagementPage = () => {
                           { label: t('admin.actions.edit'), onClick: () => openEdit(product) },
                           {
                             label: product.active ? t('admin.actions.disable') : t('admin.actions.enable'),
-                            onClick: () => toggleMutation.mutate({ id: product.id, active: !product.active }),
+                            onClick: () => handleDisable(product),
+                            danger: product.active,
                           },
                         ]}
                       />
@@ -265,31 +307,49 @@ const ProductManagementPage = () => {
       {modalMode && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b">
+            <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-semibold">
                 {modalMode === 'create' && t('admin.product.new')}
                 {modalMode === 'edit' && t('admin.product.edit')}
                 {modalMode === 'view' && t('admin.actions.view')}
               </h2>
+              <button onClick={closeModal} className="p-1 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
             </div>
 
-            {modalMode === 'view' && selectedProduct ? (
-              <div className="p-6 space-y-3 text-sm">
-                <p><strong>{t('admin.product.name')}:</strong> {selectedProduct.name}</p>
-                <p><strong>{t('admin.product.description')}:</strong> {selectedProduct.description || '-'}</p>
-                <p><strong>{t('admin.product.price')}:</strong> ${selectedProduct.price.toFixed(2)}</p>
-                <p><strong>{t('admin.product.stock')}:</strong> {selectedProduct.stockQuantity}</p>
-                <p><strong>{t('admin.product.category')}:</strong> {selectedProduct.categoryName}</p>
-                {previewImages.length > 0 && (
-                  <div className="flex gap-2 flex-wrap">
-                    {previewImages.map((src, i) => (
-                      <img key={i} src={src} alt="" className="w-20 h-20 object-cover rounded border" />
-                    ))}
+            {modalMode === 'view' && selectedProduct && (
+              <div className="p-6 space-y-4">
+                <ProductImageSlider
+                  images={existingImages}
+                  alt={selectedProduct.name}
+                  className="aspect-video w-full rounded-lg"
+                  showControlsAlways
+                />
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div><span className="text-gray-500">{t('admin.product.name')}:</span> <strong>{selectedProduct.name}</strong></div>
+                  <div><span className="text-gray-500">{t('admin.product.price')}:</span> <strong>${selectedProduct.price.toFixed(2)}</strong></div>
+                  <div><span className="text-gray-500">{t('admin.product.stock')}:</span> <strong>{selectedProduct.stockQuantity}</strong></div>
+                  <div><span className="text-gray-500">{t('admin.product.category')}:</span> <strong>{selectedProduct.categoryName || 'GENERAL'}</strong></div>
+                  <div><span className="text-gray-500">{t('admin.product.barcode')}:</span> <strong>{selectedProduct.barcode}</strong></div>
+                  <div>
+                    <span className="text-gray-500">{t('admin.product.status')}:</span>{' '}
+                    <strong>{selectedProduct.active ? t('admin.product.active') : t('admin.product.inactive')}</strong>
+                  </div>
+                </div>
+                {selectedProduct.description && (
+                  <div className="text-sm">
+                    <span className="text-gray-500">{t('admin.product.description')}:</span>
+                    <p className="mt-1 text-gray-800">{selectedProduct.description}</p>
                   </div>
                 )}
-                <button onClick={closeModal} className="mt-4 w-full py-2 border rounded-lg">{t('common.cancel')}</button>
+                <button onClick={closeModal} className="w-full py-2 border rounded-lg hover:bg-gray-50">
+                  {t('common.cancel')}
+                </button>
               </div>
-            ) : (
+            )}
+
+            {(modalMode === 'create' || modalMode === 'edit') && (
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">{t('admin.product.name')} *</label>
@@ -329,23 +389,49 @@ const ProductManagementPage = () => {
                   <input value={formData.barcode} onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">{t('admin.product.image')}</label>
-                  <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                    className="w-full text-sm" />
-                  {previewImages.length > 0 && (
-                    <div className="flex gap-2 mt-2">
-                      {previewImages.map((src, i) => (
-                        <img key={i} src={src} alt="" className="w-16 h-16 object-cover rounded border" />
+
+                {modalMode === 'edit' && existingImages.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2">{t('admin.product.currentImages')}</label>
+                    <div className="flex flex-wrap gap-2">
+                      {existingImages.map((img) => (
+                        <div key={img.id} className="relative group">
+                          <img
+                            src={toImageSrc(img.imageData)}
+                            alt=""
+                            className="w-20 h-20 object-cover rounded-lg border"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (selectedProduct && window.confirm(t('admin.product.confirmRemoveImage'))) {
+                                deleteImageMutation.mutate({ productId: selectedProduct.id, imageId: img.id })
+                              }
+                            }}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
                       ))}
                     </div>
-                  )}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    {modalMode === 'edit' ? t('admin.product.addImages') : t('admin.product.image')}
+                  </label>
+                  <ImageUploadField files={pendingFiles} onChange={setPendingFiles} />
                 </div>
+
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={closeModal} className="flex-1 py-2 border rounded-lg">{t('common.cancel')}</button>
+                  <button type="button" onClick={closeModal} className="flex-1 py-2 border rounded-lg hover:bg-gray-50">
+                    {t('common.cancel')}
+                  </button>
                   <button type="submit" disabled={createMutation.isPending || updateMutation.isPending}
                     className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-                    {t('common.save')}
+                    {createMutation.isPending || updateMutation.isPending ? t('common.saving') : t('common.save')}
                   </button>
                 </div>
               </form>

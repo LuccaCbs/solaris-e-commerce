@@ -15,7 +15,8 @@
     "inactive": "Inactivo",
     "saving": "Guardando...",
     "yes": "Sí",
-    "no": "No"
+    "no": "No",
+    "backToHome": "Volver al inicio"
   },
   "nav": {
     "home": "Inicio",
@@ -175,7 +176,18 @@
       "updated": "Producto actualizado exitosamente",
       "deleted": "Producto eliminado exitosamente",
       "statusUpdated": "Estado del producto actualizado",
-      "image": "Imagen del producto",
+      "enabled": "Producto habilitado",
+      "disabled": "Producto deshabilitado",
+      "confirmDisable": "¿Deshabilitar \"{{name}}\"? El producto no estará disponible en la tienda.",
+      "confirmEnable": "¿Habilitar \"{{name}}\"?",
+      "image": "Imágenes del producto",
+      "selectImages": "Seleccionar imágenes",
+      "multipleImagesHint": "Podés seleccionar varias imágenes a la vez",
+      "currentImages": "Imágenes actuales",
+      "addImages": "Agregar imágenes",
+      "imageRemoved": "Imagen eliminada",
+      "confirmRemoveImage": "¿Eliminar esta imagen?",
+      "noResults": "No se encontraron productos con ese criterio",
       "error": "Error al procesar el producto"
     },
     "category": {

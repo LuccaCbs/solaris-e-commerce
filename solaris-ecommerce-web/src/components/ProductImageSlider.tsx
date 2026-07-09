@@ -6,9 +6,10 @@ type ProductImageSliderProps = {
   images?: ProductImage[]
   alt: string
   className?: string
+  showControlsAlways?: boolean
 }
 
-const ProductImageSlider = ({ images = [], alt, className = '' }: ProductImageSliderProps) => {
+const ProductImageSlider = ({ images = [], alt, className = '', showControlsAlways = false }: ProductImageSliderProps) => {
   const [index, setIndex] = useState(0)
   const activeImages = images.filter((img) => img.active !== false)
 
@@ -38,7 +39,7 @@ const ProductImageSlider = ({ images = [], alt, className = '' }: ProductImageSl
               e.stopPropagation()
               setIndex((prev) => (prev === 0 ? activeImages.length - 1 : prev - 1))
             }}
-            className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-1 shadow opacity-0 group-hover:opacity-100 transition"
+            className={`absolute left-1 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-1 shadow ${showControlsAlways ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition`}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -49,7 +50,7 @@ const ProductImageSlider = ({ images = [], alt, className = '' }: ProductImageSl
               e.stopPropagation()
               setIndex((prev) => (prev === activeImages.length - 1 ? 0 : prev + 1))
             }}
-            className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-1 shadow opacity-0 group-hover:opacity-100 transition"
+            className={`absolute right-1 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-1 shadow ${showControlsAlways ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition`}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
