@@ -3,6 +3,8 @@ import { ProductImage } from './productImageService'
 
 export type CardType = 'BASIC' | 'COMPACT' | 'MENU'
 
+export type DisplayMode = 'INDIVIDUAL' | 'BY_CATEGORY'
+
 export type FeaturedProduct = {
   id: number
   productId: number
@@ -24,14 +26,19 @@ export type FeaturedProductRequest = {
   active?: boolean
 }
 
+export type PublicStorefront = {
+  displayMode: DisplayMode
+  products: FeaturedProduct[]
+}
+
 export const featuredProductService = {
   getAll: async (): Promise<FeaturedProduct[]> => {
     const response = await apiClient.get('/featured-products')
     return response.data
   },
 
-  getPublic: async (): Promise<FeaturedProduct[]> => {
-    const response = await apiClient.get('/public/featured-products')
+  getPublic: async (): Promise<PublicStorefront> => {
+    const response = await apiClient.get('/public/storefront')
     return response.data
   },
 

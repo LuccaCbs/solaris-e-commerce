@@ -1,24 +1,16 @@
 import { FeaturedProduct, CardType } from '../api/featuredProductService'
 
-export const CARD_SECTIONS: { type: CardType; titleKey: string; gridClass: string; previewClass: string }[] = [
-  {
-    type: 'BASIC',
-    titleKey: 'home.sectionBasic',
-    gridClass: 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4',
-    previewClass: 'max-w-xs',
-  },
-  {
-    type: 'COMPACT',
-    titleKey: 'home.sectionCompact',
-    gridClass: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4',
-    previewClass: 'max-w-sm',
-  },
-  {
-    type: 'MENU',
-    titleKey: 'home.sectionMenu',
-    gridClass: 'grid grid-cols-1 lg:grid-cols-2 gap-6',
-    previewClass: 'max-w-2xl',
-  },
+export type DisplayMode = 'INDIVIDUAL' | 'BY_CATEGORY'
+
+export const FEATURED_DISPLAY_MODE_KEY = 'featured.display_mode'
+
+/** Grid uniforme de 3 columnas para admin y vitrina individual */
+export const UNIFORM_GRID_CLASS = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
+
+export const CARD_SECTIONS: { type: CardType; titleKey: string }[] = [
+  { type: 'BASIC', titleKey: 'home.sectionBasic' },
+  { type: 'COMPACT', titleKey: 'home.sectionCompact' },
+  { type: 'MENU', titleKey: 'home.sectionMenu' },
 ]
 
 export const filterFeaturedProducts = (
@@ -56,3 +48,23 @@ export const groupByCardType = (items: FeaturedProduct[]) => ({
   COMPACT: items.filter((item) => item.cardType === 'COMPACT'),
   MENU: items.filter((item) => item.cardType === 'MENU'),
 })
+
+export const groupByCategory = (items: FeaturedProduct[]) => {
+  const map = new Map<string, FeaturedProduct[]>()
+
+  items.forEach((item) => {
+    const category = item.categoryName || 'GENERAL'
+    const list = map.get(category) || []
+    list.push(item)
+    map.set(category, list)
+  })
+
+  return Array.from(map.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([categoryName, products]) => ({ categoryName, products }))
+}
+
+export const getCarouselWindow = (items: FeaturedProduct[], startIndex: number, size = 3) => {
+  if (items.length <= size) return items
+  return Array.from({ length: size }, (_, i) => items[(startIndex + i) % items.length])
+}

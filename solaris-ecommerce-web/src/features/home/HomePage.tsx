@@ -3,11 +3,17 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import AppHeader from '../../components/AppHeader'
 import CatalogFilterSidebar, { CatalogFilters } from '../../components/CatalogFilterSidebar'
+import CategoryProductCarousel from '../../components/CategoryProductCarousel'
 import ProductDetailModal from '../../components/ProductDetailModal'
 import StorefrontProductCard from '../../components/StorefrontProductCard'
 import { featuredProductService, FeaturedProduct } from '../../api/featuredProductService'
 import { categoryService } from '../../api/categoryService'
-import { CARD_SECTIONS, filterFeaturedProducts } from '../../utils/featuredProductLayout'
+import {
+  CARD_SECTIONS,
+  filterFeaturedProducts,
+  groupByCategory,
+  UNIFORM_GRID_CLASS,
+} from '../../utils/featuredProductLayout'
 
 const HomePage = () => {
   const { t } = useTranslation()
@@ -24,10 +30,13 @@ const HomePage = () => {
     queryFn: categoryService.getAllCategories,
   })
 
-  const { data: featured = [], isLoading } = useQuery({
-    queryKey: ['public-featured'],
+  const { data: storefront, isLoading } = useQuery({
+    queryKey: ['public-storefront'],
     queryFn: featuredProductService.getPublic,
   })
+
+  const displayMode = storefront?.displayMode || 'INDIVIDUAL'
+  const featured = storefront?.products || []
 
   const categoryNames = useMemo(
     () => new Map(categories.map((category) => [category.id, category.name])),
@@ -39,7 +48,7 @@ const HomePage = () => {
     categoryNames,
   })
 
-  const grouped = useMemo(() => {
+  const groupedByCardType = useMemo(() => {
     const groups: Record<string, FeaturedProduct[]> = { BASIC: [], COMPACT: [], MENU: [] }
     filteredFeatured.forEach((item) => {
       const type = item.cardType || 'BASIC'
@@ -47,6 +56,11 @@ const HomePage = () => {
     })
     return groups
   }, [filteredFeatured])
+
+  const groupedByCategory = useMemo(
+    () => groupByCategory(filteredFeatured),
+    [filteredFeatured]
+  )
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -65,10 +79,21 @@ const HomePage = () => {
               <div className="text-center py-12">{t('catalog.loadingProducts')}</div>
             ) : filteredFeatured.length === 0 ? (
               <div className="text-center py-12 text-gray-600">{t('catalog.noProducts')}</div>
+            ) : displayMode === 'BY_CATEGORY' ? (
+              <div className="space-y-8">
+                {groupedByCategory.map(({ categoryName, products }) => (
+                  <CategoryProductCarousel
+                    key={categoryName}
+                    categoryName={categoryName}
+                    products={products}
+                    onSelect={setSelectedProduct}
+                  />
+                ))}
+              </div>
             ) : (
               <div className="space-y-10">
                 {CARD_SECTIONS.map((section) => {
-                  const items = grouped[section.type]
+                  const items = groupedByCardType[section.type]
                   if (!items?.length) return null
 
                   return (
@@ -76,13 +101,13 @@ const HomePage = () => {
                       <h2 className="text-lg font-semibold text-gray-900 mb-4">
                         {t(section.titleKey)}
                       </h2>
-                      <div className={section.gridClass}>
+                      <div className={UNIFORM_GRID_CLASS}>
                         {items.map((item) => (
                           <StorefrontProductCard
                             key={item.id}
                             item={item}
                             onSelect={setSelectedProduct}
-                            largeMenu={section.type === 'MENU'}
+                            largeMenu={item.cardType === 'MENU'}
                           />
                         ))}
                       </div>
