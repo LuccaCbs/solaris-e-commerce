@@ -43,7 +43,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/active").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/filter").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/paginated").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/{productId}/images/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()

@@ -143,7 +143,8 @@ public class ProductService {
     }
 
     public Page<ProductResponse> manageProducts(String search, Long categoryId, Pageable pageable) {
-        return productRepository.manageSearch(search, categoryId, pageable)
+        String normalizedSearch = (search == null || search.isBlank()) ? null : search.trim();
+        return productRepository.manageSearch(normalizedSearch, categoryId, pageable)
                 .map(this::mapToResponse);
     }
 
