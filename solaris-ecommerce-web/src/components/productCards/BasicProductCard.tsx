@@ -1,15 +1,25 @@
-import { Link } from 'react-router-dom'
 import { FeaturedProduct } from '../../api/featuredProductService'
 import ProductImageSlider from '../ProductImageSlider'
 
 type BasicProductCardProps = {
   item: FeaturedProduct
+  onSelect?: (item: FeaturedProduct) => void
 }
 
-const BasicProductCard = ({ item }: BasicProductCardProps) => {
+const BasicProductCard = ({ item, onSelect }: BasicProductCardProps) => {
   return (
-    <Link to="/catalog" className="block h-full">
-      <article className="bg-white rounded-md shadow-sm hover:shadow-md transition h-full flex flex-col overflow-hidden border border-gray-100">
+    <article
+      role={onSelect ? 'button' : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+      onClick={() => onSelect?.(item)}
+      onKeyDown={(e) => {
+        if (onSelect && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault()
+          onSelect(item)
+        }
+      }}
+      className={`bg-white rounded-md shadow-sm hover:shadow-md transition h-full flex flex-col overflow-hidden border border-gray-100 ${onSelect ? 'cursor-pointer' : ''}`}
+    >
         <ProductImageSlider
           images={item.images}
           alt={item.productName}
@@ -34,7 +44,6 @@ const BasicProductCard = ({ item }: BasicProductCardProps) => {
           </div>
         </div>
       </article>
-    </Link>
   )
 }
 

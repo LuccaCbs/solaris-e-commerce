@@ -8,6 +8,7 @@ import StorefrontProductCard from '../../components/StorefrontProductCard'
 import { featuredProductService, CardType } from '../../api/featuredProductService'
 import { productService } from '../../api/productService'
 import { Product } from '../../types/product'
+import { CARD_SECTIONS, groupByCardType } from '../../utils/featuredProductLayout'
 
 const CARD_TYPES: { value: CardType; labelKey: string }[] = [
   { value: 'BASIC', labelKey: 'admin.featured.cardBasic' },
@@ -47,7 +48,8 @@ const FeaturedProductsPage = () => {
       setProductId('')
       setCardType('BASIC')
     },
-    onError: (error: any) => toast.error(error?.response?.data?.message || t('admin.featured.error')),
+    onError: (error: { response?: { data?: { message?: string } } }) =>
+      toast.error(error?.response?.data?.message || t('admin.featured.error')),
   })
 
   const toggleMutation = useMutation({
@@ -67,22 +69,33 @@ const FeaturedProductsPage = () => {
   const updateCardMutation = useMutation({
     mutationFn: ({ id, cardType }: { id: number; cardType: CardType }) =>
       featuredProductService.update(id, { cardType }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['featured-products'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['featured-products'] })
+      queryClient.invalidateQueries({ queryKey: ['public-featured'] })
+      toast.success(t('admin.featured.cardUpdated'))
+    },
+    onError: () => toast.error(t('admin.featured.error')),
   })
 
-  const availableProducts = products?.filter(
-    (p: Product) => p.active && !featured?.some((f) => f.productId === p.id)
-  ) || []
+  const availableProducts =
+    products?.filter(
+      (p: Product) => p.active && !featured?.some((f) => f.productId === p.id)
+    ) || []
+
+  const grouped = groupByCardType(featured || [])
 
   return (
     <>
-    <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('admin.featured.title')}</h1>
             <p className="text-gray-600 text-sm mt-1">{t('admin.featured.subtitle')}</p>
           </div>
-          <button onClick={() => setShowModal(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
             <Plus className="w-5 h-5" />
             {t('admin.featured.add')}
           </button>
@@ -96,41 +109,67 @@ const FeaturedProductsPage = () => {
             <p className="text-gray-600">{t('admin.featured.empty')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {featured.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg shadow p-4">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{item.productName}</h3>
-                    <select
-                      value={item.cardType}
-                      onChange={(e) => updateCardMutation.mutate({ id: item.id, cardType: e.target.value as CardType })}
-                      className="mt-1 text-sm border rounded px-2 py-1"
-                    >
-                      {CARD_TYPES.map((ct) => (
-                        <option key={ct.value} value={ct.value}>{t(ct.labelKey)}</option>
-                      ))}
-                    </select>
+          <div className="space-y-10">
+            {CARD_SECTIONS.map((section) => {
+              const items = grouped[section.type]
+              if (!items.length) return null
+
+              return (
+                <section key={section.type}>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    {t(section.titleKey)}
+                  </h2>
+                  <div className={section.gridClass}>
+                    {items.map((item) => (
+                      <div key={item.id} className={`bg-white rounded-lg shadow p-4 ${section.previewClass}`}>
+                        <div className="flex items-start justify-between mb-4 gap-2">
+                          <div className="min-w-0">
+                            <h3 className="font-semibold text-gray-900 truncate">{item.productName}</h3>
+                            <label className="block text-xs text-gray-500 mt-1 mb-1">
+                              {t('admin.featured.cardType')}
+                            </label>
+                            <select
+                              value={item.cardType}
+                              onChange={(e) =>
+                                updateCardMutation.mutate({
+                                  id: item.id,
+                                  cardType: e.target.value as CardType,
+                                })
+                              }
+                              disabled={updateCardMutation.isPending}
+                              className="w-full text-sm border rounded px-2 py-1"
+                            >
+                              {CARD_TYPES.map((ct) => (
+                                <option key={ct.value} value={ct.value}>
+                                  {t(ct.labelKey)}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <ActionsMenu
+                            items={[
+                              {
+                                label: item.active ? t('admin.actions.disable') : t('admin.actions.enable'),
+                                onClick: () => toggleMutation.mutate({ id: item.id, active: !item.active }),
+                              },
+                              {
+                                label: t('common.delete'),
+                                onClick: () => deleteMutation.mutate(item.id),
+                                danger: true,
+                              },
+                            ]}
+                          />
+                        </div>
+                        <StorefrontProductCard
+                          item={item}
+                          largeMenu={section.type === 'MENU'}
+                        />
+                      </div>
+                    ))}
                   </div>
-                  <ActionsMenu
-                    items={[
-                      {
-                        label: item.active ? t('admin.actions.disable') : t('admin.actions.enable'),
-                        onClick: () => toggleMutation.mutate({ id: item.id, active: !item.active }),
-                      },
-                      {
-                        label: t('common.delete'),
-                        onClick: () => deleteMutation.mutate(item.id),
-                        danger: true,
-                      },
-                    ]}
-                  />
-                </div>
-                <div className="max-w-xs">
-                  <StorefrontProductCard item={item} />
-                </div>
-              </div>
-            ))}
+                </section>
+              )
+            })}
           </div>
         )}
       </div>
@@ -142,25 +181,37 @@ const FeaturedProductsPage = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">{t('admin.featured.selectProduct')} *</label>
-                <select value={productId} onChange={(e) => setProductId(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg">
+                <select
+                  value={productId}
+                  onChange={(e) => setProductId(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                >
                   <option value="">{t('admin.featured.chooseProduct')}</option>
                   {availableProducts.map((p: Product) => (
-                    <option key={p.id} value={p.id}>{p.name} - ${p.price}</option>
+                    <option key={p.id} value={p.id}>
+                      {p.name} - ${p.price}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">{t('admin.featured.cardType')} *</label>
-                <select value={cardType} onChange={(e) => setCardType(e.target.value as CardType)}
-                  className="w-full px-3 py-2 border rounded-lg">
+                <select
+                  value={cardType}
+                  onChange={(e) => setCardType(e.target.value as CardType)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                >
                   {CARD_TYPES.map((ct) => (
-                    <option key={ct.value} value={ct.value}>{t(ct.labelKey)}</option>
+                    <option key={ct.value} value={ct.value}>
+                      {t(ct.labelKey)}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setShowModal(false)} className="flex-1 py-2 border rounded-lg">{t('common.cancel')}</button>
+                <button onClick={() => setShowModal(false)} className="flex-1 py-2 border rounded-lg">
+                  {t('common.cancel')}
+                </button>
                 <button
                   onClick={() => createMutation.mutate()}
                   disabled={!productId || createMutation.isPending}

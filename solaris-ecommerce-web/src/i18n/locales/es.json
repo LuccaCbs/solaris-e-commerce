@@ -39,7 +39,10 @@
     "searchPlaceholder": "Buscar productos...",
     "all": "Todo",
     "available": "disponibles",
-    "outOfStock": "Agotado"
+    "outOfStock": "Agotado",
+    "sectionBasic": "Productos destacados",
+    "sectionCompact": "Ofertas compactas",
+    "sectionMenu": "Carta / Menú"
   },
   "login": {
     "title": "Iniciar Sesión",
@@ -275,6 +278,7 @@
       "empty": "No hay productos expuestos en la tienda",
       "created": "Producto expuesto correctamente",
       "deleted": "Producto removido de la vitrina",
+      "cardUpdated": "Tipo de card actualizado",
       "error": "Error al exponer el producto"
     }
   }
