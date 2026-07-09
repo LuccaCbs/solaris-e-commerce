@@ -144,16 +144,28 @@ public class ProductService {
 
     public Page<ProductResponse> manageProducts(String search, Long categoryId, Pageable pageable) {
         String normalizedSearch = (search == null || search.isBlank()) ? null : search.trim();
+        Page<Product> page;
+
         if (normalizedSearch == null && categoryId == null) {
-            return productRepository.findAll(pageable).map(this::mapToResponse);
+            page = productRepository.findAll(pageable);
+        } else if (normalizedSearch == null) {
+            page = productRepository.findByCategoryId(categoryId, pageable);
+        } else if (categoryId == null) {
+            page = productRepository.searchManageProducts(normalizedSearch, pageable);
+        } else {
+            page = productRepository.searchManageProductsByCategory(normalizedSearch, categoryId, pageable);
         }
-        return productRepository.manageSearch(normalizedSearch, categoryId, pageable)
-                .map(this::mapToResponse);
+
+        return page.map(this::mapToResponse);
     }
 
     // Búsqueda y filtros avanzados
     public Page<ProductResponse> searchProducts(String search, Pageable pageable) {
-        return productRepository.searchProducts(search, pageable)
+        String normalizedSearch = (search == null || search.isBlank()) ? null : search.trim();
+        if (normalizedSearch == null) {
+            return productRepository.findByActiveTrue(pageable).map(this::mapToResponse);
+        }
+        return productRepository.searchActiveProducts(normalizedSearch, pageable)
                 .map(this::mapToResponse);
     }
 
@@ -166,17 +178,17 @@ public class ProductService {
             Pageable pageable
     ) {
         String normalizedSearch = (search == null || search.isBlank()) ? null : search.trim();
-        boolean hasFilters = normalizedSearch != null
-                || categoryId != null
-                || ivaRate != null
-                || minPrice != null
-                || maxPrice != null;
-        if (!hasFilters) {
-            return productRepository.findByActiveTrue(pageable).map(this::mapToResponse);
+
+        Page<Product> page;
+        if (normalizedSearch == null) {
+            page = productRepository.findActiveByFilters(categoryId, ivaRate, minPrice, maxPrice, pageable);
+        } else {
+            page = productRepository.searchActiveWithFilters(
+                    normalizedSearch, categoryId, ivaRate, minPrice, maxPrice, pageable
+            );
         }
-        return productRepository.advancedSearch(
-                normalizedSearch, categoryId, ivaRate, minPrice, maxPrice, pageable
-        ).map(this::mapToResponse);
+
+        return page.map(this::mapToResponse);
     }
 
     public Page<ProductResponse> getProductsByCategoryPaginated(Long categoryId, Pageable pageable) {
