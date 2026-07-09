@@ -15,7 +15,6 @@ public class ProductRequest {
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
     private String description;
 
-    @NotBlank(message = "Barcode is required")
     @Size(max = 255, message = "Barcode must not exceed 255 characters")
     private String barcode;
 

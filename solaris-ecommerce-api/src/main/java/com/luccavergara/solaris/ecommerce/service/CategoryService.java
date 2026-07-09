@@ -23,13 +23,18 @@ public class CategoryService {
     private final UserRepository userRepository;
 
     public CategoryResponse createCategory(CategoryRequest request, Long userId) {
+        if (categoryRepository.existsByNameIgnoreCase(request.getName())) {
+            throw new RuntimeException("Ya existe una categoría con ese nombre");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Category category = Category.builder()
                 .name(request.getName())
                 .description(request.getDescription())
-                .systemCategory(request.getSystemCategory())
+                .systemCategory(false)
+                .active(true)
                 .user(user)
                 .createdBy(user)
                 .createdAt(LocalDateTime.now())
@@ -43,9 +48,17 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
+        if (Boolean.TRUE.equals(category.getSystemCategory())) {
+            throw new RuntimeException("La categoría GENERAL del sistema no puede modificarse");
+        }
+
+        if (!category.getName().equalsIgnoreCase(request.getName())
+                && categoryRepository.existsByNameIgnoreCase(request.getName())) {
+            throw new RuntimeException("Ya existe una categoría con ese nombre");
+        }
+
         category.setName(request.getName());
         category.setDescription(request.getDescription());
-        category.setSystemCategory(request.getSystemCategory());
 
         category = categoryRepository.save(category);
         return mapToResponse(category);
@@ -57,6 +70,12 @@ public class CategoryService {
         return mapToResponse(category);
     }
 
+    public CategoryResponse getGeneralCategory() {
+        Category category = categoryRepository.findByNameIgnoreCase("GENERAL")
+                .orElseThrow(() -> new RuntimeException("Categoría GENERAL no encontrada"));
+        return mapToResponse(category);
+    }
+
     public List<CategoryResponse> getAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(this::mapToResponse)
@@ -64,9 +83,20 @@ public class CategoryService {
     }
 
     public void deleteCategory(Long id) {
+        toggleCategoryStatus(id, false);
+    }
+
+    public CategoryResponse toggleCategoryStatus(Long id, boolean active) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
-        categoryRepository.delete(category);
+
+        if (Boolean.TRUE.equals(category.getSystemCategory())) {
+            throw new RuntimeException("La categoría GENERAL del sistema no puede deshabilitarse");
+        }
+
+        category.setActive(active);
+        category = categoryRepository.save(category);
+        return mapToResponse(category);
     }
 
     private CategoryResponse mapToResponse(Category category) {
@@ -76,6 +106,7 @@ public class CategoryService {
                 .description(category.getDescription())
                 .createdAt(category.getCreatedAt())
                 .systemCategory(category.getSystemCategory())
+                .active(category.getActive())
                 .build();
     }
 }

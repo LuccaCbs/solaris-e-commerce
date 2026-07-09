@@ -2,11 +2,13 @@ package com.luccavergara.solaris.ecommerce.controller;
 
 import com.luccavergara.solaris.ecommerce.dto.ProductImageRequest;
 import com.luccavergara.solaris.ecommerce.dto.ProductImageResponse;
+import com.luccavergara.solaris.ecommerce.entity.User;
 import com.luccavergara.solaris.ecommerce.service.ProductImageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,10 +25,10 @@ public class ProductImageController {
     public ResponseEntity<ProductImageResponse> addProductImage(
             @PathVariable Long productId,
             @Valid @RequestBody ProductImageRequest request,
-            @RequestHeader("X-User-Id") Long userId
+            @AuthenticationPrincipal User user
     ) {
         request.setProductId(productId);
-        return ResponseEntity.ok(productImageService.addProductImage(request, userId));
+        return ResponseEntity.ok(productImageService.addProductImage(request, user.getId()));
     }
 
     @GetMapping("/{imageId}")

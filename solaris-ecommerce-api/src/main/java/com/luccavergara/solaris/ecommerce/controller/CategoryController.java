@@ -38,9 +38,9 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
-        return ResponseEntity.ok(categoryService.getCategoryById(id));
+    @GetMapping("/general")
+    public ResponseEntity<CategoryResponse> getGeneralCategory() {
+        return ResponseEntity.ok(categoryService.getGeneralCategory());
     }
 
     @GetMapping
@@ -48,10 +48,24 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getAllCategories());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryService.getCategoryById(id));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
+    public ResponseEntity<CategoryResponse> toggleCategoryStatus(
+            @PathVariable Long id,
+            @RequestParam boolean active
+    ) {
+        return ResponseEntity.ok(categoryService.toggleCategoryStatus(id, active));
     }
 }

@@ -1,5 +1,6 @@
 package com.luccavergara.solaris.ecommerce.controller;
 
+import com.luccavergara.solaris.ecommerce.dto.ChangePasswordRequest;
 import com.luccavergara.solaris.ecommerce.dto.UserProfileRequest;
 import com.luccavergara.solaris.ecommerce.dto.UserProfileResponse;
 import com.luccavergara.solaris.ecommerce.service.UserProfileService;
@@ -31,10 +32,9 @@ public class UserProfileController {
     @PostMapping("/{userId}/change-password")
     public ResponseEntity<Void> changePassword(
             @PathVariable Long userId,
-            @RequestParam String currentPassword,
-            @RequestParam String newPassword
+            @Valid @RequestBody ChangePasswordRequest request
     ) {
-        userProfileService.changePassword(userId, currentPassword, newPassword);
+        userProfileService.changePassword(userId, request.getCurrentPassword(), request.getNewPassword());
         return ResponseEntity.ok().build();
     }
 }

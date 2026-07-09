@@ -17,4 +17,5 @@ public class CategoryResponse {
     private String description;
     private LocalDateTime createdAt;
     private Boolean systemCategory;
+    private Boolean active;
 }

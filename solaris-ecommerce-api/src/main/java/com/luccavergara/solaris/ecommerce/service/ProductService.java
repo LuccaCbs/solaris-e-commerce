@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,30 +31,28 @@ public class ProductService {
     private final UserRepository userRepository;
 
     public ProductResponse createProduct(ProductRequest request, Long userId) {
-        if (productRepository.findByBarcode(request.getBarcode()).isPresent()) {
-            throw new RuntimeException("Product with this barcode already exists");
+        String barcode = resolveBarcode(request.getBarcode());
+
+        if (productRepository.findByBarcode(barcode).isPresent()) {
+            throw new RuntimeException("Ya existe un producto con ese código de barras");
         }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Category category = null;
-        if (request.getCategoryId() != null) {
-            category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-        }
+        Category category = resolveCategory(request.getCategoryId());
 
         Product product = Product.builder()
                 .name(request.getName())
                 .description(request.getDescription())
-                .barcode(request.getBarcode())
+                .barcode(barcode)
                 .barcodeFormat(request.getBarcodeFormat())
                 .price(request.getPrice())
                 .stockQuantity(request.getStockQuantity())
                 .lowStockThreshold(request.getLowStockThreshold())
                 .category(category)
                 .ivaRate(request.getIvaRate())
-                .active(request.getActive())
+                .active(request.getActive() != null ? request.getActive() : true)
                 .user(user)
                 .createdBy(user)
                 .createdAt(LocalDateTime.now())
@@ -67,28 +66,36 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        if (!product.getBarcode().equals(request.getBarcode())) {
-            if (productRepository.findByBarcode(request.getBarcode()).isPresent()) {
-                throw new RuntimeException("Product with this barcode already exists");
-            }
+        String barcode = request.getBarcode() != null && !request.getBarcode().isBlank()
+                ? request.getBarcode()
+                : product.getBarcode();
+
+        if (!product.getBarcode().equals(barcode)
+                && productRepository.findByBarcode(barcode).isPresent()) {
+            throw new RuntimeException("Ya existe un producto con ese código de barras");
         }
 
-        Category category = null;
-        if (request.getCategoryId() != null) {
-            category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-        }
+        Category category = request.getCategoryId() != null
+                ? categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"))
+                : product.getCategory();
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
-        product.setBarcode(request.getBarcode());
-        product.setBarcodeFormat(request.getBarcodeFormat());
+        product.setBarcode(barcode);
+        if (request.getBarcodeFormat() != null) {
+            product.setBarcodeFormat(request.getBarcodeFormat());
+        }
         product.setPrice(request.getPrice());
         product.setStockQuantity(request.getStockQuantity());
         product.setLowStockThreshold(request.getLowStockThreshold());
         product.setCategory(category);
-        product.setIvaRate(request.getIvaRate());
-        product.setActive(request.getActive());
+        if (request.getIvaRate() != null) {
+            product.setIvaRate(request.getIvaRate());
+        }
+        if (request.getActive() != null) {
+            product.setActive(request.getActive());
+        }
 
         product = productRepository.save(product);
         return mapToResponse(product);
@@ -124,9 +131,20 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
+        toggleProductStatus(id, false);
+    }
+
+    public ProductResponse toggleProductStatus(Long id, boolean active) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-        productRepository.delete(product);
+        product.setActive(active);
+        product = productRepository.save(product);
+        return mapToResponse(product);
+    }
+
+    public Page<ProductResponse> manageProducts(String search, Long categoryId, Pageable pageable) {
+        return productRepository.manageSearch(search, categoryId, pageable)
+                .map(this::mapToResponse);
     }
 
     // Búsqueda y filtros avanzados
@@ -155,6 +173,22 @@ public class ProductService {
     public Page<ProductResponse> getProductsByIvaRate(ProductIvaRate ivaRate, Pageable pageable) {
         return productRepository.findByIvaRateAndActive(ivaRate, pageable)
                 .map(this::mapToResponse);
+    }
+
+    private String resolveBarcode(String barcode) {
+        if (barcode == null || barcode.isBlank()) {
+            return "AUTO-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        }
+        return barcode;
+    }
+
+    private Category resolveCategory(Long categoryId) {
+        if (categoryId != null) {
+            return categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+        }
+        return categoryRepository.findByNameIgnoreCase("GENERAL")
+                .orElseThrow(() -> new RuntimeException("Categoría GENERAL no encontrada. Reinicie la aplicación."));
     }
 
     private ProductResponse mapToResponse(Product product) {

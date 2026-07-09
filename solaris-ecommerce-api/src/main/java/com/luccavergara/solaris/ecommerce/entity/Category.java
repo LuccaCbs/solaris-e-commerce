@@ -30,6 +30,10 @@ public class Category {
     @Column(nullable = false)
     private Boolean systemCategory;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean active = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
