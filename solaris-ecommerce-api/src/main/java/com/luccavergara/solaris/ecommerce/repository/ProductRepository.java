@@ -15,6 +15,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByBarcode(String barcode);
     List<Product> findByCategoryId(Long categoryId);
     List<Product> findByActiveTrue();
+
+    Page<Product> findByActiveTrue(Pageable pageable);
     
     @Query("SELECT COUNT(p) FROM Product p WHERE p.stockQuantity < p.lowStockThreshold")
     long countByStockQuantityLessThanLowStockThreshold();

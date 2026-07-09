@@ -1,6 +1,7 @@
 package com.luccavergara.solaris.ecommerce.service;
 
 import com.luccavergara.solaris.ecommerce.dto.FeaturedProductRequest;
+import com.luccavergara.solaris.ecommerce.dto.FeaturedProductUpdateRequest;
 import com.luccavergara.solaris.ecommerce.dto.FeaturedProductResponse;
 import com.luccavergara.solaris.ecommerce.dto.ProductImageResponse;
 import com.luccavergara.solaris.ecommerce.entity.FeaturedProduct;
@@ -47,7 +48,7 @@ public class FeaturedProductService {
         return mapToResponse(featuredProductRepository.save(featured));
     }
 
-    public FeaturedProductResponse update(Long id, FeaturedProductRequest request) {
+    public FeaturedProductResponse update(Long id, FeaturedProductUpdateRequest request) {
         FeaturedProduct featured = featuredProductRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto expuesto no encontrado"));
 

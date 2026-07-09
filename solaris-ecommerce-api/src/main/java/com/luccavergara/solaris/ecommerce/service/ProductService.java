@@ -144,6 +144,9 @@ public class ProductService {
 
     public Page<ProductResponse> manageProducts(String search, Long categoryId, Pageable pageable) {
         String normalizedSearch = (search == null || search.isBlank()) ? null : search.trim();
+        if (normalizedSearch == null && categoryId == null) {
+            return productRepository.findAll(pageable).map(this::mapToResponse);
+        }
         return productRepository.manageSearch(normalizedSearch, categoryId, pageable)
                 .map(this::mapToResponse);
     }
@@ -162,8 +165,18 @@ public class ProductService {
             BigDecimal maxPrice,
             Pageable pageable
     ) {
-        return productRepository.advancedSearch(search, categoryId, ivaRate, minPrice, maxPrice, pageable)
-                .map(this::mapToResponse);
+        String normalizedSearch = (search == null || search.isBlank()) ? null : search.trim();
+        boolean hasFilters = normalizedSearch != null
+                || categoryId != null
+                || ivaRate != null
+                || minPrice != null
+                || maxPrice != null;
+        if (!hasFilters) {
+            return productRepository.findByActiveTrue(pageable).map(this::mapToResponse);
+        }
+        return productRepository.advancedSearch(
+                normalizedSearch, categoryId, ivaRate, minPrice, maxPrice, pageable
+        ).map(this::mapToResponse);
     }
 
     public Page<ProductResponse> getProductsByCategoryPaginated(Long categoryId, Pageable pageable) {

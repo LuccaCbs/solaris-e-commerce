@@ -2,6 +2,7 @@ package com.luccavergara.solaris.ecommerce.controller;
 
 import com.luccavergara.solaris.ecommerce.dto.FeaturedProductRequest;
 import com.luccavergara.solaris.ecommerce.dto.FeaturedProductResponse;
+import com.luccavergara.solaris.ecommerce.dto.FeaturedProductUpdateRequest;
 import com.luccavergara.solaris.ecommerce.service.FeaturedProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class FeaturedProductController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
     public ResponseEntity<FeaturedProductResponse> update(
             @PathVariable Long id,
-            @Valid @RequestBody FeaturedProductRequest request
+            @RequestBody FeaturedProductUpdateRequest request
     ) {
         return ResponseEntity.ok(featuredProductService.update(id, request));
     }
