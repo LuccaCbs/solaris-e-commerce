@@ -7,6 +7,11 @@ export const categoryService = {
     return response.data
   },
 
+  getGeneralCategory: async (): Promise<Category> => {
+    const response = await apiClient.get('/categories/general')
+    return response.data
+  },
+
   getCategoryById: async (id: number): Promise<Category> => {
     const response = await apiClient.get(`/categories/${id}`)
     return response.data
@@ -24,5 +29,10 @@ export const categoryService = {
 
   deleteCategory: async (id: number): Promise<void> => {
     await apiClient.delete(`/categories/${id}`)
+  },
+
+  toggleStatus: async (id: number, active: boolean): Promise<Category> => {
+    const response = await apiClient.patch(`/categories/${id}/status`, null, { params: { active } })
+    return response.data
   },
 }

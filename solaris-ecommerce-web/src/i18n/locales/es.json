@@ -26,8 +26,10 @@
     "cart": "Carrito",
     "login": "Iniciar Sesión",
     "logout": "Cerrar Sesión",
+    "myProfile": "Mi perfil",
     "admin": "Administración",
     "products": "Productos",
+    "featured": "Productos expuestos",
     "customers": "Clientes",
     "config": "Configuración"
   },
@@ -118,7 +120,24 @@
     "update": "Actualizar",
     "error": "Error al actualizar el carrito"
   },
+  "profile": {
+    "title": "Mi Perfil",
+    "changePassword": "Cambiar contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Confirmar nueva contraseña",
+    "passwordChanged": "Contraseña actualizada correctamente",
+    "passwordError": "Error al cambiar la contraseña",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "notLoggedIn": "Debes iniciar sesión para ver tu perfil"
+  },
   "admin": {
+    "actions": {
+      "view": "Ver",
+      "edit": "Editar",
+      "enable": "Habilitar",
+      "disable": "Deshabilitar"
+    },
     "dashboard": {
       "title": "Panel de Administración",
       "totalProducts": "Total de Productos",
@@ -155,6 +174,8 @@
       "created": "Producto creado exitosamente",
       "updated": "Producto actualizado exitosamente",
       "deleted": "Producto eliminado exitosamente",
+      "statusUpdated": "Estado del producto actualizado",
+      "image": "Imagen del producto",
       "error": "Error al procesar el producto"
     },
     "category": {
@@ -174,6 +195,8 @@
       "created": "Categoría creada exitosamente",
       "updated": "Categoría actualizada exitosamente",
       "deleted": "Categoría eliminada exitosamente",
+      "statusUpdated": "Estado de la categoría actualizado",
+      "system": "Sistema",
       "error": "Error al procesar la categoría"
     },
     "customer": {
@@ -226,6 +249,21 @@
       "save": "Guardar Cambios",
       "updated": "Configuración actualizada exitosamente",
       "error": "Error al actualizar la configuración"
+    },
+    "featured": {
+      "title": "Productos expuestos",
+      "subtitle": "Elegí qué productos mostrar en la tienda y con qué tipo de card",
+      "add": "Exponer producto",
+      "selectProduct": "Producto",
+      "chooseProduct": "Seleccionar producto...",
+      "cardType": "Tipo de card",
+      "cardBasic": "Card básica (tienda)",
+      "cardCompact": "Card compacta",
+      "cardMenu": "Card menú (restaurante)",
+      "empty": "No hay productos expuestos en la tienda",
+      "created": "Producto expuesto correctamente",
+      "deleted": "Producto removido de la vitrina",
+      "error": "Error al exponer el producto"
     }
   }
 }

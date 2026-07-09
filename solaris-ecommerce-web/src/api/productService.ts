@@ -36,6 +36,21 @@ export const productService = {
     await apiClient.delete(`/products/${id}`)
   },
 
+  toggleStatus: async (id: number, active: boolean): Promise<Product> => {
+    const response = await apiClient.patch(`/products/${id}/status`, null, { params: { active } })
+    return response.data
+  },
+
+  getManageProducts: async (filters: {
+    search?: string
+    categoryId?: number
+    page?: number
+    size?: number
+  }): Promise<Page<Product>> => {
+    const response = await apiClient.get('/products/manage', { params: filters })
+    return response.data
+  },
+
   searchProducts: async (search: string, page = 0, size = 10) => {
     const response = await apiClient.get('/products/search', {
       params: { search, page, size }

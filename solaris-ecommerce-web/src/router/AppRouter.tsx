@@ -10,6 +10,8 @@ import CategoryManagementPage from '../features/admin/CategoryManagementPage'
 import CustomerManagementPage from '../features/admin/CustomerManagementPage'
 import DashboardPage from '../features/admin/DashboardPage'
 import StoreConfigPage from '../features/admin/StoreConfigPage'
+import FeaturedProductsPage from '../features/admin/FeaturedProductsPage'
+import ProfilePage from '../features/profile/ProfilePage'
 import AdminLayout from '../components/AdminLayout'
 import ProtectedRoute from '../components/ProtectedRoute'
 
@@ -22,6 +24,7 @@ const AppRouter = () => {
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/catalog" element={<CatalogPage />} />
       <Route path="/cart" element={<CartPage />} />
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route
         path="/admin"
         element={
@@ -33,6 +36,7 @@ const AppRouter = () => {
         <Route index element={<DashboardPage />} />
         <Route path="products" element={<ProductManagementPage />} />
         <Route path="categories" element={<CategoryManagementPage />} />
+        <Route path="featured" element={<FeaturedProductsPage />} />
         <Route path="customers" element={<CustomerManagementPage />} />
         <Route path="config" element={<StoreConfigPage />} />
       </Route>
