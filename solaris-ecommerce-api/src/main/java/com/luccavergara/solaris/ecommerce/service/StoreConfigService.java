@@ -87,6 +87,12 @@ public class StoreConfigService {
                 ));
     }
 
+    public String getConfigValueOrDefault(String key, String defaultValue) {
+        return storeConfigRepository.findByConfigKey(key)
+                .map(StoreConfig::getConfigValue)
+                .orElse(defaultValue);
+    }
+
     private StoreConfigResponse mapToResponse(StoreConfig config) {
         return StoreConfigResponse.builder()
                 .id(config.getId())
