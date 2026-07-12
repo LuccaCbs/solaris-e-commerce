@@ -23,5 +23,7 @@ public class CategoryResponse {
     private String parentName;
     private String imageData;
     private String categoryType;
+    private Long productId;
+    private String productName;
     private List<CategoryResponse> subcategories;
 }

@@ -3,8 +3,10 @@ package com.luccavergara.solaris.ecommerce.service;
 import com.luccavergara.solaris.ecommerce.dto.CategoryRequest;
 import com.luccavergara.solaris.ecommerce.dto.CategoryResponse;
 import com.luccavergara.solaris.ecommerce.entity.Category;
+import com.luccavergara.solaris.ecommerce.entity.Product;
 import com.luccavergara.solaris.ecommerce.entity.User;
 import com.luccavergara.solaris.ecommerce.repository.CategoryRepository;
+import com.luccavergara.solaris.ecommerce.repository.ProductRepository;
 import com.luccavergara.solaris.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
     public CategoryResponse createCategory(CategoryRequest request, Long userId) {
@@ -31,13 +34,17 @@ public class CategoryService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Category parent = resolveParent(request.getParentId(), null);
+        Category.CategoryType categoryType = resolveCategoryType(request, parent);
+        validateCategoryHierarchy(categoryType, parent);
+        Product product = resolveProduct(request.getProductId(), categoryType);
 
-        Category.CategoryType categoryType = request.getCategoryType() != null
-                ? Category.CategoryType.valueOf(request.getCategoryType().toUpperCase())
-                : (parent == null ? Category.CategoryType.MENU : Category.CategoryType.SUBMENU);
+        String name = request.getName();
+        if (product != null && (name == null || name.isBlank())) {
+            name = product.getName();
+        }
 
         Category category = Category.builder()
-                .name(request.getName())
+                .name(name)
                 .description(request.getDescription())
                 .systemCategory(false)
                 .active(true)
@@ -47,6 +54,7 @@ public class CategoryService {
                 .parent(parent)
                 .imageData(request.getImageData())
                 .categoryType(categoryType)
+                .product(product)
                 .build();
 
         category = categoryRepository.save(category);
@@ -66,18 +74,68 @@ public class CategoryService {
             throw new RuntimeException("Ya existe una categoría con ese nombre");
         }
 
+        Category parent = resolveParent(request.getParentId(), id);
+        Category.CategoryType categoryType = request.getCategoryType() != null
+                ? Category.CategoryType.valueOf(request.getCategoryType().toUpperCase())
+                : category.getCategoryType();
+        validateCategoryHierarchy(categoryType, parent);
+        Product product = resolveProduct(request.getProductId(), categoryType);
+
         category.setName(request.getName());
         category.setDescription(request.getDescription());
-        category.setParent(resolveParent(request.getParentId(), id));
+        category.setParent(parent);
         if (request.getImageData() != null) {
             category.setImageData(request.getImageData());
         }
-        if (request.getCategoryType() != null) {
-            category.setCategoryType(Category.CategoryType.valueOf(request.getCategoryType().toUpperCase()));
-        }
+        category.setCategoryType(categoryType);
+        category.setProduct(product);
 
         category = categoryRepository.save(category);
         return mapToResponse(category);
+    }
+
+    private Category.CategoryType resolveCategoryType(CategoryRequest request, Category parent) {
+        if (request.getCategoryType() != null) {
+            return Category.CategoryType.valueOf(request.getCategoryType().toUpperCase());
+        }
+        if (parent == null) {
+            return Category.CategoryType.MENU;
+        }
+        if (parent.getCategoryType() == Category.CategoryType.MENU) {
+            return Category.CategoryType.SUBMENU;
+        }
+        return Category.CategoryType.ITEM;
+    }
+
+    private void validateCategoryHierarchy(Category.CategoryType type, Category parent) {
+        switch (type) {
+            case MENU -> {
+                if (parent != null) {
+                    throw new RuntimeException("Un menú principal no puede tener categoría padre");
+                }
+            }
+            case SUBMENU -> {
+                if (parent == null || parent.getCategoryType() != Category.CategoryType.MENU) {
+                    throw new RuntimeException("Un sub-menú debe tener un menú principal como padre");
+                }
+            }
+            case ITEM -> {
+                if (parent == null || parent.getCategoryType() != Category.CategoryType.SUBMENU) {
+                    throw new RuntimeException("Un ítem debe tener un sub-menú como padre");
+                }
+            }
+        }
+    }
+
+    private Product resolveProduct(Long productId, Category.CategoryType categoryType) {
+        if (productId == null) {
+            return null;
+        }
+        if (categoryType != Category.CategoryType.ITEM) {
+            throw new RuntimeException("Solo los ítems pueden asociarse a un producto");
+        }
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
     }
 
     private Category resolveParent(Long parentId, Long selfId) {
@@ -89,7 +147,6 @@ public class CategoryService {
         }
         Category parent = categoryRepository.findById(parentId)
                 .orElseThrow(() -> new RuntimeException("Categoría padre no encontrada"));
-        // Allow 3 levels: MENU -> SUBMENU -> ITEM
         if (parent.getParent() != null && parent.getParent().getParent() != null) {
             throw new RuntimeException("Solo se admiten 3 niveles de jerarquía (MENU -> SUBMENU -> ITEM)");
         }
@@ -117,16 +174,19 @@ public class CategoryService {
     public List<CategoryResponse> getCategoryTree() {
         return categoryRepository.findByParentIsNull().stream()
                 .filter(category -> Boolean.TRUE.equals(category.getActive()))
-                .map(category -> {
-                    CategoryResponse response = mapToResponse(category);
-                    List<CategoryResponse> children = categoryRepository.findByParentId(category.getId()).stream()
-                            .filter(child -> Boolean.TRUE.equals(child.getActive()))
-                            .map(this::mapToResponse)
-                            .collect(Collectors.toList());
-                    response.setSubcategories(children);
-                    return response;
-                })
+                .filter(category -> !Boolean.TRUE.equals(category.getSystemCategory()))
+                .map(this::buildTreeNode)
                 .collect(Collectors.toList());
+    }
+
+    private CategoryResponse buildTreeNode(Category category) {
+        CategoryResponse response = mapToResponse(category);
+        List<CategoryResponse> children = categoryRepository.findByParentId(category.getId()).stream()
+                .filter(child -> Boolean.TRUE.equals(child.getActive()))
+                .map(this::buildTreeNode)
+                .collect(Collectors.toList());
+        response.setSubcategories(children);
+        return response;
     }
 
     public void deleteCategory(Long id) {
@@ -158,6 +218,8 @@ public class CategoryService {
                 .parentName(category.getParent() != null ? category.getParent().getName() : null)
                 .imageData(category.getImageData())
                 .categoryType(category.getCategoryType() != null ? category.getCategoryType().name() : null)
+                .productId(category.getProduct() != null ? category.getProduct().getId() : null)
+                .productName(category.getProduct() != null ? category.getProduct().getName() : null)
                 .build();
     }
 }

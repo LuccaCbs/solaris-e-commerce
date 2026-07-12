@@ -19,4 +19,6 @@ public class CategoryRequest {
     private String imageData;
 
     private String categoryType;
+
+    private Long productId;
 }
