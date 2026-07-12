@@ -234,6 +234,9 @@
       "updated": "Configuration updated successfully",
       "error": "Error updating configuration"
     },
+    "menuConfig": {
+      "title": "Menu Configuration"
+    },
     "appearance": {
       "title": "Appearance Configuration",
       "themePresets": "Theme Presets",

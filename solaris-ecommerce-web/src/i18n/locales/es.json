@@ -266,6 +266,9 @@
       "updated": "Configuración actualizada exitosamente",
       "error": "Error al actualizar la configuración"
     },
+    "menuConfig": {
+      "title": "Configuración de Menús"
+    },
     "featured": {
       "title": "Productos expuestos",
       "subtitle": "Elegí qué productos mostrar en la tienda y con qué tipo de card",

@@ -234,6 +234,9 @@
       "updated": "Konfigurazioa ondo eguneratua",
       "error": "Errorea konfigurazioa eguneratzean"
     },
+    "menuConfig": {
+      "title": "Menuen Konfigurazioa"
+    },
     "appearance": {
       "title": "Itxuraren Konfigurazioa",
       "themePresets": "Aurrez definitutako gaiak",

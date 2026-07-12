@@ -234,6 +234,9 @@
       "updated": "Configuració actualitzada exitosament",
       "error": "Error al actualitzar la configuració"
     },
+    "menuConfig": {
+      "title": "Configuració de Menús"
+    },
     "appearance": {
       "title": "Configuració d'Apariència",
       "themePresets": "Temes predefinits",

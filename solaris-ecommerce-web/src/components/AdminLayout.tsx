@@ -8,6 +8,7 @@ import {
   Settings,
   Star,
   Palette,
+  Menu,
 } from 'lucide-react'
 import AppHeader from './AppHeader'
 
@@ -15,6 +16,7 @@ const adminNavItems = [
   { path: '/admin', labelKey: 'admin.dashboard.title', icon: LayoutDashboard, exact: true },
   { path: '/admin/products', labelKey: 'nav.products', icon: Package },
   { path: '/admin/categories', labelKey: 'nav.categories', icon: FolderTree },
+  { path: '/admin/menu-config', labelKey: 'admin.menuConfig.title', icon: Menu },
   { path: '/admin/featured', labelKey: 'nav.featured', icon: Star },
   { path: '/admin/customers', labelKey: 'admin.customer.title', icon: Users },
   { path: '/admin/appearance', labelKey: 'admin.appearance.title', icon: Palette },
