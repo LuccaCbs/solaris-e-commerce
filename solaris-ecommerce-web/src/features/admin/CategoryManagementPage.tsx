@@ -13,9 +13,10 @@ type CategoryFormData = {
   description: string
   parentId: string
   imageData: string | null
+  categoryType: 'MENU' | 'SUBMENU' | 'ITEM'
 }
 
-const emptyForm: CategoryFormData = { name: '', description: '', parentId: '', imageData: '' }
+const emptyForm: CategoryFormData = { name: '', description: '', parentId: '', imageData: '', categoryType: 'ITEM' }
 
 const CategoryManagementPage = () => {
   const { t } = useTranslation()
@@ -81,6 +82,7 @@ const CategoryManagementPage = () => {
       description: category.description || '',
       parentId: category.parentId ? String(category.parentId) : '',
       imageData: category.imageData || '',
+      categoryType: category.categoryType || 'ITEM',
     })
     setModalMode('edit')
   }
@@ -98,6 +100,7 @@ const CategoryManagementPage = () => {
       description: formData.description,
       parentId: formData.parentId ? Number(formData.parentId) : null,
       imageData: formData.imageData || null,
+      categoryType: formData.categoryType,
     }
     if (modalMode === 'edit' && selected) {
       updateMutation.mutate({ id: selected.id, data: payload })
@@ -220,6 +223,15 @@ const CategoryManagementPage = () => {
                     .map((category) => (
                       <option key={category.id} value={category.id}>{category.name}</option>
                     ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">{t('admin.category.type')}</label>
+                <select value={formData.categoryType} onChange={(e) => setFormData({ ...formData, categoryType: e.target.value as 'MENU' | 'SUBMENU' | 'ITEM' })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                  <option value="MENU">MENU (Categoría Principal)</option>
+                  <option value="SUBMENU">SUBMENU (Submenú)</option>
+                  <option value="ITEM">ITEM (Item)</option>
                 </select>
               </div>
               <div>

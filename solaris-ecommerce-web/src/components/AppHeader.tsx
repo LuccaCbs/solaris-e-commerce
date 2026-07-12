@@ -70,7 +70,7 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
           )}
 
           <nav className="hidden md:flex items-center gap-4">
-            {categoryTree.map((category) => (
+            {categoryTree.filter(cat => cat.categoryType === 'MENU').map((category) => (
               <div
                 key={category.id}
                 className="relative group"
@@ -87,18 +87,28 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
                   <div className="absolute top-full left-0 right-0 mt-0 w-screen bg-white shadow-xl z-50" style={{ backgroundColor: 'var(--color-primary)' }}>
                     <div className="max-w-7xl mx-auto px-4 py-8">
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                        {category.subcategories.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to="/"
-                            className="flex flex-col items-center gap-3 p-4 rounded-lg hover:opacity-80 transition"
-                            onClick={() => setHoveredCategory(null)}
-                          >
+                        {category.subcategories.filter(sub => sub.categoryType === 'SUBMENU').map((sub) => (
+                          <div key={sub.id} className="flex flex-col items-center gap-3 p-4 rounded-lg hover:opacity-80 transition">
                             {sub.imageData && (
                               <img src={toImageSrc(sub.imageData)} alt={sub.name} className="w-20 h-20 rounded-lg object-cover" />
                             )}
                             <span className="text-sm font-medium text-center" style={{ color: 'var(--color-secondary)' }}>{sub.name.toLowerCase()}</span>
-                          </Link>
+                            {sub.subcategories && sub.subcategories.length > 0 && (
+                              <div className="w-full mt-2 pt-2 border-t space-y-1" style={{ borderColor: 'var(--color-secondary)', opacity: 0.5 }}>
+                                {sub.subcategories.filter(item => item.categoryType === 'ITEM').map((item) => (
+                                  <Link
+                                    key={item.id}
+                                    to="/"
+                                    className="block text-xs text-center py-1 hover:opacity-80"
+                                    style={{ color: 'var(--color-secondary)' }}
+                                    onClick={() => setHoveredCategory(null)}
+                                  >
+                                    {item.name.toLowerCase()}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         ))}
                       </div>
                     </div>

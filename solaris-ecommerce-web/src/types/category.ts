@@ -8,5 +8,6 @@ export type Category = {
   parentId?: number | null
   parentName?: string | null
   imageData?: string | null
+  categoryType?: 'MENU' | 'SUBMENU' | 'ITEM'
   subcategories?: Category[]
 }

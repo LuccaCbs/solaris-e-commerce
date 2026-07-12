@@ -17,4 +17,6 @@ public class CategoryRequest {
     private Long parentId;
 
     private String imageData;
+
+    private String categoryType;
 }

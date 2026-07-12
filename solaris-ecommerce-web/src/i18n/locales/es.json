@@ -200,6 +200,7 @@
       "add": "Agregar Categoría",
       "name": "Nombre",
       "description": "Descripción",
+      "type": "Tipo",
       "status": "Estado",
       "actions": "Acciones",
       "active": "Activo",

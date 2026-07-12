@@ -170,6 +170,7 @@
       "add": "Afegir Categoria",
       "name": "Nom",
       "description": "Descripció",
+      "type": "Tipus",
       "status": "Estat",
       "actions": "Accions",
       "active": "Actiu",

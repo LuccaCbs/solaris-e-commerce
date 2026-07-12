@@ -170,6 +170,7 @@
       "add": "Add Category",
       "name": "Name",
       "description": "Description",
+      "type": "Type",
       "status": "Status",
       "actions": "Actions",
       "active": "Active",

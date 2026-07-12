@@ -48,4 +48,15 @@ public class Category {
 
     @Column(name = "image_data", columnDefinition = "TEXT")
     private String imageData;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category_type", nullable = false)
+    @Builder.Default
+    private CategoryType categoryType = CategoryType.ITEM;
+
+    public enum CategoryType {
+        MENU,
+        SUBMENU,
+        ITEM
+    }
 }

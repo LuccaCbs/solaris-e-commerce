@@ -32,6 +32,10 @@ public class CategoryService {
 
         Category parent = resolveParent(request.getParentId(), null);
 
+        Category.CategoryType categoryType = request.getCategoryType() != null
+                ? Category.CategoryType.valueOf(request.getCategoryType().toUpperCase())
+                : (parent == null ? Category.CategoryType.MENU : Category.CategoryType.SUBMENU);
+
         Category category = Category.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -42,6 +46,7 @@ public class CategoryService {
                 .createdAt(LocalDateTime.now())
                 .parent(parent)
                 .imageData(request.getImageData())
+                .categoryType(categoryType)
                 .build();
 
         category = categoryRepository.save(category);
@@ -67,6 +72,9 @@ public class CategoryService {
         if (request.getImageData() != null) {
             category.setImageData(request.getImageData());
         }
+        if (request.getCategoryType() != null) {
+            category.setCategoryType(Category.CategoryType.valueOf(request.getCategoryType().toUpperCase()));
+        }
 
         category = categoryRepository.save(category);
         return mapToResponse(category);
@@ -81,8 +89,9 @@ public class CategoryService {
         }
         Category parent = categoryRepository.findById(parentId)
                 .orElseThrow(() -> new RuntimeException("Categoría padre no encontrada"));
-        if (parent.getParent() != null) {
-            throw new RuntimeException("Solo se admite un nivel de subcategorías");
+        // Allow 3 levels: MENU -> SUBMENU -> ITEM
+        if (parent.getParent() != null && parent.getParent().getParent() != null) {
+            throw new RuntimeException("Solo se admiten 3 niveles de jerarquía (MENU -> SUBMENU -> ITEM)");
         }
         return parent;
     }
@@ -148,6 +157,7 @@ public class CategoryService {
                 .parentId(category.getParent() != null ? category.getParent().getId() : null)
                 .parentName(category.getParent() != null ? category.getParent().getName() : null)
                 .imageData(category.getImageData())
+                .categoryType(category.getCategoryType() != null ? category.getCategoryType().name() : null)
                 .build();
     }
 }
