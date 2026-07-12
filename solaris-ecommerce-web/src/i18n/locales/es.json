@@ -285,6 +285,23 @@
       "deleted": "Producto removido de la vitrina",
       "cardUpdated": "Tipo de card actualizado",
       "error": "Error al exponer el producto"
+    },
+    "appearance": {
+      "title": "Configuración de Apariencia",
+      "themePresets": "Temas predefinidos",
+      "customColors": "Colores personalizados",
+      "primaryColor": "Color primario",
+      "secondaryColor": "Color secundario",
+      "accentColor": "Color de acento",
+      "heroBanner": "Banner principal",
+      "heroTitle": "Título del banner",
+      "heroSubtitle": "Subtítulo del banner",
+      "heroImages": "Imágenes del banner",
+      "uploadImages": "Subir imágenes",
+      "save": "Guardar cambios",
+      "reset": "Restablecer",
+      "updated": "Apariencia actualizada exitosamente",
+      "error": "Error al actualizar la apariencia"
     }
   }
 }

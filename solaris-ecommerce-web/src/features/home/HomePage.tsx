@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import AppHeader from '../../components/AppHeader'
+import HeroBanner from '../../components/HeroBanner'
+import FullWidthProductSlider from '../../components/FullWidthProductSlider'
 import CatalogFilterSidebar, { CatalogFilters } from '../../components/CatalogFilterSidebar'
 import CategoryProductCarousel from '../../components/CategoryProductCarousel'
 import ProductDetailModal from '../../components/ProductDetailModal'
@@ -65,6 +67,8 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <AppHeader showSearch={false} />
+      <HeroBanner />
+      <FullWidthProductSlider products={filteredFeatured} onSelect={setSelectedProduct} />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-8">

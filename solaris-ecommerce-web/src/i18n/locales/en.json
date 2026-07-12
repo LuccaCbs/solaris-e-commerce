@@ -226,6 +226,23 @@
       "save": "Save Changes",
       "updated": "Configuration updated successfully",
       "error": "Error updating configuration"
+    },
+    "appearance": {
+      "title": "Appearance Configuration",
+      "themePresets": "Theme Presets",
+      "customColors": "Custom Colors",
+      "primaryColor": "Primary Color",
+      "secondaryColor": "Secondary Color",
+      "accentColor": "Accent Color",
+      "heroBanner": "Hero Banner",
+      "heroTitle": "Banner Title",
+      "heroSubtitle": "Banner Subtitle",
+      "heroImages": "Banner Images",
+      "uploadImages": "Upload Images",
+      "save": "Save Changes",
+      "reset": "Reset",
+      "updated": "Appearance updated successfully",
+      "error": "Error updating appearance"
     }
   }
 }

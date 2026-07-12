@@ -5,4 +5,8 @@ export type Category = {
   createdAt: string
   systemCategory: boolean
   active?: boolean
+  parentId?: number | null
+  parentName?: string | null
+  imageData?: string | null
+  subcategories?: Category[]
 }

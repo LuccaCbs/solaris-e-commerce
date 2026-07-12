@@ -13,4 +13,8 @@ public class CategoryRequest {
     private String description;
 
     private Boolean systemCategory = false;
+
+    private Long parentId;
+
+    private String imageData;
 }

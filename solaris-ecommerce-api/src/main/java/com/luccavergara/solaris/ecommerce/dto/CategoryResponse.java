@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,4 +19,8 @@ public class CategoryResponse {
     private LocalDateTime createdAt;
     private Boolean systemCategory;
     private Boolean active;
+    private Long parentId;
+    private String parentName;
+    private String imageData;
+    private List<CategoryResponse> subcategories;
 }

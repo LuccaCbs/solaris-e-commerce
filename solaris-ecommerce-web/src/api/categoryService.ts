@@ -12,6 +12,11 @@ export const categoryService = {
     return response.data
   },
 
+  getCategoryTree: async (): Promise<Category[]> => {
+    const response = await apiClient.get('/categories/tree')
+    return response.data
+  },
+
   getCategoryById: async (id: number): Promise<Category> => {
     const response = await apiClient.get(`/categories/${id}`)
     return response.data

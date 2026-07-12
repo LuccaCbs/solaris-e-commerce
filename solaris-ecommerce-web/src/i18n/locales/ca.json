@@ -226,6 +226,23 @@
       "save": "Desar Canvis",
       "updated": "Configuració actualitzada exitosament",
       "error": "Error al actualitzar la configuració"
+    },
+    "appearance": {
+      "title": "Configuració d'Apariència",
+      "themePresets": "Temes predefinits",
+      "customColors": "Colors personalitzats",
+      "primaryColor": "Color primari",
+      "secondaryColor": "Color secundari",
+      "accentColor": "Color d'accent",
+      "heroBanner": "Banner principal",
+      "heroTitle": "Títol del banner",
+      "heroSubtitle": "Subtítol del banner",
+      "heroImages": "Imatges del banner",
+      "uploadImages": "Pujar imatges",
+      "save": "Desar canvis",
+      "reset": "Restablir",
+      "updated": "Apariència actualitzada exitosament",
+      "error": "Error al actualitzar l'apariència"
     }
   }
 }

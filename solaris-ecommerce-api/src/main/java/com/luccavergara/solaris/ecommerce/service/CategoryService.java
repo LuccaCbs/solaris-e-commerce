@@ -30,6 +30,8 @@ public class CategoryService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        Category parent = resolveParent(request.getParentId(), null);
+
         Category category = Category.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -38,6 +40,8 @@ public class CategoryService {
                 .user(user)
                 .createdBy(user)
                 .createdAt(LocalDateTime.now())
+                .parent(parent)
+                .imageData(request.getImageData())
                 .build();
 
         category = categoryRepository.save(category);
@@ -59,9 +63,28 @@ public class CategoryService {
 
         category.setName(request.getName());
         category.setDescription(request.getDescription());
+        category.setParent(resolveParent(request.getParentId(), id));
+        if (request.getImageData() != null) {
+            category.setImageData(request.getImageData());
+        }
 
         category = categoryRepository.save(category);
         return mapToResponse(category);
+    }
+
+    private Category resolveParent(Long parentId, Long selfId) {
+        if (parentId == null) {
+            return null;
+        }
+        if (selfId != null && parentId.equals(selfId)) {
+            throw new RuntimeException("Una categoría no puede ser su propia categoría padre");
+        }
+        Category parent = categoryRepository.findById(parentId)
+                .orElseThrow(() -> new RuntimeException("Categoría padre no encontrada"));
+        if (parent.getParent() != null) {
+            throw new RuntimeException("Solo se admite un nivel de subcategorías");
+        }
+        return parent;
     }
 
     public CategoryResponse getCategoryById(Long id) {
@@ -79,6 +102,21 @@ public class CategoryService {
     public List<CategoryResponse> getAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<CategoryResponse> getCategoryTree() {
+        return categoryRepository.findByParentIsNull().stream()
+                .filter(category -> Boolean.TRUE.equals(category.getActive()))
+                .map(category -> {
+                    CategoryResponse response = mapToResponse(category);
+                    List<CategoryResponse> children = categoryRepository.findByParentId(category.getId()).stream()
+                            .filter(child -> Boolean.TRUE.equals(child.getActive()))
+                            .map(this::mapToResponse)
+                            .collect(Collectors.toList());
+                    response.setSubcategories(children);
+                    return response;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -107,6 +145,9 @@ public class CategoryService {
                 .createdAt(category.getCreatedAt())
                 .systemCategory(category.getSystemCategory())
                 .active(category.getActive())
+                .parentId(category.getParent() != null ? category.getParent().getId() : null)
+                .parentName(category.getParent() != null ? category.getParent().getName() : null)
+                .imageData(category.getImageData())
                 .build();
     }
 }
