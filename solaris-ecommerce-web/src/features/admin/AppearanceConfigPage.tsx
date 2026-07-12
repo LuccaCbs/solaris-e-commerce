@@ -38,7 +38,7 @@ const AppearanceConfigPage = () => {
 
   const updateMutation = useMutation({
     mutationFn: ({ key, value }: { key: string; value: string }) =>
-      storeConfigService.updateConfig(key, { configKey: key, configValue: value }),
+      storeConfigService.updateConfig(key, { configKey: key, configValue: value, category: 'appearance' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['store-config'] })
       toast.success(t('admin.appearance.updated'))
