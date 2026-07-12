@@ -78,27 +78,29 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
                 onMouseLeave={() => setHoveredCategory(null)}
               >
                 <button className="flex items-center gap-1 font-medium text-sm transition hover:opacity-80" style={{ color: 'var(--color-secondary)' }}>
-                  {category.name}
+                  {category.name.toLowerCase()}
                   {category.subcategories && category.subcategories.length > 0 && (
                     <ChevronDown className="w-4 h-4" />
                   )}
                 </button>
                 {hoveredCategory === category.id && category.subcategories && category.subcategories.length > 0 && (
-                  <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-xl border border-gray-100 z-50 p-4">
-                    <div className="space-y-2">
-                      {category.subcategories.map((sub) => (
-                        <Link
-                          key={sub.id}
-                          to="/"
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition"
-                          onClick={() => setHoveredCategory(null)}
-                        >
-                          {sub.imageData && (
-                            <img src={toImageSrc(sub.imageData)} alt={sub.name} className="w-10 h-10 rounded object-cover" />
-                          )}
-                          <span className="text-sm font-medium text-gray-900">{sub.name}</span>
-                        </Link>
-                      ))}
+                  <div className="absolute top-full left-0 right-0 mt-0 w-screen bg-white shadow-xl z-50" style={{ backgroundColor: 'var(--color-primary)' }}>
+                    <div className="max-w-7xl mx-auto px-4 py-8">
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        {category.subcategories.map((sub) => (
+                          <Link
+                            key={sub.id}
+                            to="/"
+                            className="flex flex-col items-center gap-3 p-4 rounded-lg hover:opacity-80 transition"
+                            onClick={() => setHoveredCategory(null)}
+                          >
+                            {sub.imageData && (
+                              <img src={toImageSrc(sub.imageData)} alt={sub.name} className="w-20 h-20 rounded-lg object-cover" />
+                            )}
+                            <span className="text-sm font-medium text-center" style={{ color: 'var(--color-secondary)' }}>{sub.name.toLowerCase()}</span>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -178,12 +180,12 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
           <nav className="md:hidden mt-4 pb-4 border-t pt-4 flex flex-col gap-2" style={{ borderColor: 'var(--color-secondary)' }}>
             {categoryTree.map((category) => (
               <div key={category.id}>
-                <Link to="/" className="font-medium" style={{ color: 'var(--color-secondary)' }}>{category.name}</Link>
+                <Link to="/" className="font-medium" style={{ color: 'var(--color-secondary)' }}>{category.name.toLowerCase()}</Link>
                 {category.subcategories && category.subcategories.length > 0 && (
                   <div className="ml-4 mt-1 space-y-1">
                     {category.subcategories.map((sub) => (
                       <Link key={sub.id} to="/" className="block text-sm opacity-80" style={{ color: 'var(--color-secondary)' }}>
-                        {sub.name}
+                        {sub.name.toLowerCase()}
                       </Link>
                     ))}
                   </div>

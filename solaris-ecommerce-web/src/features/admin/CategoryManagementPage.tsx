@@ -12,7 +12,7 @@ type CategoryFormData = {
   name: string
   description: string
   parentId: string
-  imageData: string
+  imageData: string | null
 }
 
 const emptyForm: CategoryFormData = { name: '', description: '', parentId: '', imageData: '' }
@@ -228,7 +228,7 @@ const CategoryManagementPage = () => {
                   {formData.imageData ? (
                     <div className="relative">
                       <img src={toImageSrc(formData.imageData)} alt="preview" className="w-16 h-16 rounded-lg object-cover border" />
-                      <button type="button" onClick={() => setFormData({ ...formData, imageData: '' })}
+                      <button type="button" onClick={() => setFormData({ ...formData, imageData: null })}
                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5">
                         <X className="w-3 h-3" />
                       </button>

@@ -119,6 +119,12 @@
     "error": "Error updating cart"
   },
   "admin": {
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "enable": "Enable",
+      "disable": "Disable"
+    },
     "dashboard": {
       "title": "Admin Dashboard",
       "totalProducts": "Total Products",

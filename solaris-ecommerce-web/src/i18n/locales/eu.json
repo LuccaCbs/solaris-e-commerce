@@ -119,6 +119,12 @@
     "error": "Error al actualitzar la cistella"
   },
   "admin": {
+    "actions": {
+      "view": "Ikusi",
+      "edit": "Editatu",
+      "enable": "Gaitu",
+      "disable": "Desgaitu"
+    },
     "dashboard": {
       "title": "Panell d'Administració",
       "totalProducts": "Total de Productes",
