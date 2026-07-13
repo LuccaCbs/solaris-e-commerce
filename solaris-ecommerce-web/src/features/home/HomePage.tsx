@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import AppHeader from '../../components/AppHeader'
 import HeroBanner from '../../components/HeroBanner'
 import FullWidthProductSlider from '../../components/FullWidthProductSlider'
+import ActiveCategorySlider from '../../components/ActiveCategorySlider'
 import CatalogFilterSidebar, { CatalogFilters } from '../../components/CatalogFilterSidebar'
 import CategoryProductCarousel from '../../components/CategoryProductCarousel'
 import ProductDetailModal from '../../components/ProductDetailModal'
@@ -127,6 +128,7 @@ const HomePage = () => {
       <AppHeader showSearch={false} />
       <HeroBanner />
       <FullWidthProductSlider products={filteredFeatured} onSelect={setSelectedProduct} />
+      <ActiveCategorySlider categories={categories} />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-8">
