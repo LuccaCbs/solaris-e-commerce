@@ -7,13 +7,15 @@ import LanguageSelector from './LanguageSelector'
 import { getStoredUser, isAdminUser, logout } from '../utils/auth'
 import { categoryService } from '../api/categoryService'
 import { toImageSrc } from '../api/productImageService'
-import { Category } from '../types/category'
+import { Category, MenuProduct } from '../types/category'
 
 type AppHeaderProps = {
   searchTerm?: string
   onSearchChange?: (value: string) => void
   showSearch?: boolean
 }
+
+const PRODUCTS_PER_COLUMN = 8
 
 const getMenuImages = (menu: Category) => {
   const images: { id: number; src: string; name: string }[] = []
@@ -28,10 +30,42 @@ const getMenuImages = (menu: Category) => {
   return images.slice(0, 2)
 }
 
-const getItemLabel = (item: Category) => item.productName || item.name
+const splitProductColumns = (products: MenuProduct[]) => {
+  const columns: MenuProduct[][] = []
+  for (let i = 0; i < products.length; i += PRODUCTS_PER_COLUMN) {
+    columns.push(products.slice(i, i + PRODUCTS_PER_COLUMN))
+  }
+  return columns.length ? columns : [[]]
+}
 
-const getItemLink = (item: Category) =>
-  item.productId ? `/catalog?productId=${item.productId}` : `/catalog?categoryId=${item.id}`
+const SubmenuProductList = ({
+  products,
+  onNavigate,
+}: {
+  products: MenuProduct[]
+  onNavigate: () => void
+}) => {
+  const columns = splitProductColumns(products)
+
+  return (
+    <div className="flex gap-6">
+      {columns.map((column, columnIndex) => (
+        <div key={columnIndex} className="flex flex-col gap-2 min-w-[130px]">
+          {column.map((product) => (
+            <Link
+              key={product.id}
+              to={`/?productId=${product.id}`}
+              className="menu-item-link block text-sm font-normal transition-colors"
+              onClick={onNavigate}
+            >
+              {product.name}
+            </Link>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
 
 const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHeaderProps) => {
   const { t } = useTranslation()
@@ -46,12 +80,10 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
   const { data: categoryTree = [] } = useQuery({
     queryKey: ['category-tree'],
     queryFn: categoryService.getCategoryTree,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
   })
 
-  const navMenus = categoryTree.filter(
-    (cat) => cat.categoryType === 'MENU' && !cat.systemCategory
-  )
+  const navMenus = categoryTree
   const hoveredMenu = navMenus.find((menu) => menu.id === hoveredCategory)
   const menuImages = hoveredMenu ? getMenuImages(hoveredMenu) : []
 
@@ -68,8 +100,30 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  const closeMenus = () => {
+    setHoveredCategory(null)
+    setMobileMenuOpen(false)
+  }
+
   return (
     <header ref={headerRef} className="relative shadow-sm" style={{ backgroundColor: 'var(--color-primary)' }}>
+      <style>{`
+        .menu-item-link {
+          color: var(--color-secondary);
+          opacity: 0.75;
+        }
+        .menu-item-link:hover {
+          opacity: 1;
+          color: color-mix(in srgb, var(--color-secondary) 70%, #7c3aed);
+        }
+        .submenu-link {
+          color: var(--color-secondary);
+        }
+        .submenu-link:hover {
+          color: color-mix(in srgb, var(--color-secondary) 70%, #7c3aed);
+        }
+      `}</style>
+
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           <Link to="/" className="flex-shrink-0">
@@ -133,35 +187,20 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
                       <div className="px-4 py-2 border-b text-sm text-gray-600">
                         {user.firstname} {user.lastname}
                       </div>
-                      <Link
-                        to="/profile"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        onClick={() => setProfileOpen(false)}
-                      >
+                      <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setProfileOpen(false)}>
                         {t('nav.myProfile')}
                       </Link>
                       {admin && (
-                        <Link
-                          to="/admin"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                          onClick={() => setProfileOpen(false)}
-                        >
+                        <Link to="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setProfileOpen(false)}>
                           {t('nav.admin')}
                         </Link>
                       )}
-                      <button
-                        onClick={logout}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                      >
+                      <button onClick={logout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                         {t('nav.logout')}
                       </button>
                     </>
                   ) : (
-                    <Link
-                      to="/login"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      onClick={() => setProfileOpen(false)}
-                    >
+                    <Link to="/login" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setProfileOpen(false)}>
                       {t('nav.login')}
                     </Link>
                   )}
@@ -182,33 +221,23 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
               <div key={category.id}>
                 <span className="font-medium" style={{ color: 'var(--color-secondary)' }}>{category.name}</span>
                 {category.subcategories && category.subcategories.length > 0 && (
-                  <div className="ml-4 mt-1 space-y-2">
-                    {category.subcategories
-                      .filter((sub) => sub.categoryType === 'SUBMENU')
-                      .map((sub) => (
-                        <div key={sub.id}>
-                          <span className="block text-sm font-semibold opacity-90" style={{ color: 'var(--color-secondary)' }}>
-                            {sub.name}
-                          </span>
-                          {sub.subcategories && sub.subcategories.length > 0 && (
-                            <div className="ml-3 mt-1 space-y-1">
-                              {sub.subcategories
-                                .filter((item) => item.categoryType === 'ITEM')
-                                .map((item) => (
-                                  <Link
-                                    key={item.id}
-                                    to={getItemLink(item)}
-                                    className="block text-sm opacity-80"
-                                    style={{ color: 'var(--color-secondary)' }}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                  >
-                                    {getItemLabel(item)}
-                                  </Link>
-                                ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                  <div className="ml-4 mt-1 space-y-3">
+                    {category.subcategories.map((sub) => (
+                      <div key={sub.id}>
+                        <Link
+                          to={`/?categoryId=${sub.id}`}
+                          className="block text-sm font-semibold submenu-link"
+                          onClick={closeMenus}
+                        >
+                          {sub.name}
+                        </Link>
+                        {sub.products && sub.products.length > 0 && (
+                          <div className="ml-3 mt-1">
+                            <SubmenuProductList products={sub.products} onNavigate={closeMenus} />
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -235,46 +264,34 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
           onMouseLeave={() => setHoveredCategory(null)}
         >
           <div className="max-w-7xl mx-auto px-6 py-10">
-            <div className="flex gap-10">
+            <div className="flex gap-10 min-h-[300px]">
               <div className="w-[60%]">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-                  {hoveredMenu.subcategories
-                    .filter((sub) => sub.categoryType === 'SUBMENU')
-                    .map((sub) => (
-                      <div key={sub.id} className="flex flex-col gap-3">
-                        <span className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--color-secondary)' }}>
-                          {sub.name}
-                        </span>
-                        {sub.subcategories && sub.subcategories.length > 0 && (
-                          <div className="space-y-2">
-                            {sub.subcategories
-                              .filter((item) => item.categoryType === 'ITEM')
-                              .map((item) => (
-                                <Link
-                                  key={item.id}
-                                  to={getItemLink(item)}
-                                  className="block text-sm font-normal opacity-80 hover:opacity-100 transition-opacity"
-                                  style={{ color: 'var(--color-secondary)' }}
-                                  onClick={() => setHoveredCategory(null)}
-                                >
-                                  {getItemLabel(item)}
-                                </Link>
-                              ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-x-10 gap-y-8">
+                  {hoveredMenu.subcategories.map((sub) => (
+                    <div key={sub.id} className="flex flex-col gap-3">
+                      <Link
+                        to={`/?categoryId=${sub.id}`}
+                        className="submenu-link text-sm font-bold uppercase tracking-wide transition-colors"
+                        onClick={closeMenus}
+                      >
+                        {sub.name}
+                      </Link>
+                      {sub.products && sub.products.length > 0 && (
+                        <SubmenuProductList products={sub.products} onNavigate={closeMenus} />
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="w-[40%] min-h-[220px]">
+              <div className="w-[40%] flex min-h-[300px]">
                 {menuImages.length > 0 ? (
-                  <div className={`grid gap-4 h-full ${menuImages.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                  <div className={`flex gap-4 flex-1 h-full ${menuImages.length > 1 ? '' : ''}`}>
                     {menuImages.map((image) => (
-                      <div key={image.id} className="relative overflow-hidden rounded-lg h-full min-h-[200px]">
+                      <div key={image.id} className="relative flex-1 overflow-hidden rounded-lg min-h-[300px]">
                         <img
                           src={toImageSrc(image.src)}
                           alt={image.name}
-                          className="w-full h-full object-cover"
+                          className="absolute inset-0 w-full h-full object-cover"
                         />
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4">
                           <p className="text-white text-sm font-bold uppercase tracking-wide">{image.name}</p>
@@ -283,7 +300,7 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
                     ))}
                   </div>
                 ) : (
-                  <div className="h-full min-h-[220px] rounded-lg bg-transparent" />
+                  <div className="flex-1 bg-transparent" />
                 )}
               </div>
             </div>

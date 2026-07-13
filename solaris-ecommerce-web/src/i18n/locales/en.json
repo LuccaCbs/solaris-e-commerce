@@ -181,6 +181,12 @@
       "created": "Category created successfully",
       "updated": "Category updated successfully",
       "deleted": "Category deleted successfully",
+      "statusUpdated": "Category status updated",
+      "system": "System",
+      "parent": "Parent category",
+      "noParent": "No parent category",
+      "image": "Image",
+      "uploadImage": "Upload image",
       "error": "Error processing category"
     },
     "customer": {

@@ -1,3 +1,8 @@
+export type MenuProduct = {
+  id: number
+  name: string
+}
+
 export type Category = {
   id: number
   name: string
@@ -12,4 +17,5 @@ export type Category = {
   productId?: number | null
   productName?: string | null
   subcategories?: Category[]
+  products?: MenuProduct[]
 }

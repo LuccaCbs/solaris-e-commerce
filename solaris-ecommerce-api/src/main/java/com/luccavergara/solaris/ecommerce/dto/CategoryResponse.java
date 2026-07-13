@@ -26,4 +26,5 @@ public class CategoryResponse {
     private Long productId;
     private String productName;
     private List<CategoryResponse> subcategories;
+    private List<MenuProductSummary> products;
 }

@@ -2,8 +2,8 @@ package com.luccavergara.solaris.ecommerce.service;
 
 import com.luccavergara.solaris.ecommerce.dto.CategoryRequest;
 import com.luccavergara.solaris.ecommerce.dto.CategoryResponse;
+import com.luccavergara.solaris.ecommerce.dto.MenuProductSummary;
 import com.luccavergara.solaris.ecommerce.entity.Category;
-import com.luccavergara.solaris.ecommerce.entity.Product;
 import com.luccavergara.solaris.ecommerce.entity.User;
 import com.luccavergara.solaris.ecommerce.repository.CategoryRepository;
 import com.luccavergara.solaris.ecommerce.repository.ProductRepository;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,15 +37,9 @@ public class CategoryService {
         Category parent = resolveParent(request.getParentId(), null);
         Category.CategoryType categoryType = resolveCategoryType(request, parent);
         validateCategoryHierarchy(categoryType, parent);
-        Product product = resolveProduct(request.getProductId(), categoryType);
-
-        String name = request.getName();
-        if (product != null && (name == null || name.isBlank())) {
-            name = product.getName();
-        }
 
         Category category = Category.builder()
-                .name(name)
+                .name(request.getName())
                 .description(request.getDescription())
                 .systemCategory(false)
                 .active(true)
@@ -54,7 +49,7 @@ public class CategoryService {
                 .parent(parent)
                 .imageData(request.getImageData())
                 .categoryType(categoryType)
-                .product(product)
+                .product(null)
                 .build();
 
         category = categoryRepository.save(category);
@@ -79,7 +74,6 @@ public class CategoryService {
                 ? Category.CategoryType.valueOf(request.getCategoryType().toUpperCase())
                 : category.getCategoryType();
         validateCategoryHierarchy(categoryType, parent);
-        Product product = resolveProduct(request.getProductId(), categoryType);
 
         category.setName(request.getName());
         category.setDescription(request.getDescription());
@@ -88,7 +82,7 @@ public class CategoryService {
             category.setImageData(request.getImageData());
         }
         category.setCategoryType(categoryType);
-        category.setProduct(product);
+        category.setProduct(null);
 
         category = categoryRepository.save(category);
         return mapToResponse(category);
@@ -99,7 +93,7 @@ public class CategoryService {
             return Category.CategoryType.valueOf(request.getCategoryType().toUpperCase());
         }
         if (parent == null) {
-            return Category.CategoryType.MENU;
+            return Category.CategoryType.ITEM;
         }
         if (parent.getCategoryType() == Category.CategoryType.MENU) {
             return Category.CategoryType.SUBMENU;
@@ -120,22 +114,9 @@ public class CategoryService {
                 }
             }
             case ITEM -> {
-                if (parent == null || parent.getCategoryType() != Category.CategoryType.SUBMENU) {
-                    throw new RuntimeException("Un ítem debe tener un sub-menú como padre");
-                }
+                // Categoría regular para productos; no forma parte del árbol de navegación manual
             }
         }
-    }
-
-    private Product resolveProduct(Long productId, Category.CategoryType categoryType) {
-        if (productId == null) {
-            return null;
-        }
-        if (categoryType != Category.CategoryType.ITEM) {
-            throw new RuntimeException("Solo los ítems pueden asociarse a un producto");
-        }
-        return productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
     }
 
     private Category resolveParent(Long parentId, Long selfId) {
@@ -147,8 +128,11 @@ public class CategoryService {
         }
         Category parent = categoryRepository.findById(parentId)
                 .orElseThrow(() -> new RuntimeException("Categoría padre no encontrada"));
-        if (parent.getParent() != null && parent.getParent().getParent() != null) {
-            throw new RuntimeException("Solo se admiten 3 niveles de jerarquía (MENU -> SUBMENU -> ITEM)");
+        if (Boolean.FALSE.equals(parent.getActive())) {
+            throw new RuntimeException("No se puede asignar una categoría padre inactiva");
+        }
+        if (parent.getCategoryType() == Category.CategoryType.SUBMENU) {
+            throw new RuntimeException("Una categoría solo puede tener como padre un menú principal");
         }
         return parent;
     }
@@ -175,17 +159,32 @@ public class CategoryService {
         return categoryRepository.findByParentIsNull().stream()
                 .filter(category -> Boolean.TRUE.equals(category.getActive()))
                 .filter(category -> !Boolean.TRUE.equals(category.getSystemCategory()))
-                .map(this::buildTreeNode)
+                .filter(category -> category.getCategoryType() == Category.CategoryType.MENU)
+                .map(this::buildMenuNode)
                 .collect(Collectors.toList());
     }
 
-    private CategoryResponse buildTreeNode(Category category) {
-        CategoryResponse response = mapToResponse(category);
-        List<CategoryResponse> children = categoryRepository.findByParentId(category.getId()).stream()
+    private CategoryResponse buildMenuNode(Category menu) {
+        CategoryResponse response = mapToResponse(menu);
+        List<CategoryResponse> submenus = categoryRepository.findByParentId(menu.getId()).stream()
                 .filter(child -> Boolean.TRUE.equals(child.getActive()))
-                .map(this::buildTreeNode)
+                .filter(child -> child.getCategoryType() == Category.CategoryType.SUBMENU)
+                .map(this::buildSubmenuNode)
                 .collect(Collectors.toList());
-        response.setSubcategories(children);
+        response.setSubcategories(submenus);
+        return response;
+    }
+
+    private CategoryResponse buildSubmenuNode(Category submenu) {
+        CategoryResponse response = mapToResponse(submenu);
+        List<MenuProductSummary> products = productRepository.findByCategoryIdAndActiveTrue(submenu.getId()).stream()
+                .map(product -> MenuProductSummary.builder()
+                        .id(product.getId())
+                        .name(product.getName())
+                        .build())
+                .collect(Collectors.toList());
+        response.setProducts(products);
+        response.setSubcategories(Collections.emptyList());
         return response;
     }
 

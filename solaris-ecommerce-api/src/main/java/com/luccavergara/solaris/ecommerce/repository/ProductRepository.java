@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByBarcode(String barcode);
     List<Product> findByCategoryId(Long categoryId);
+    List<Product> findByCategoryIdAndActiveTrue(Long categoryId);
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
     List<Product> findByActiveTrue();
 

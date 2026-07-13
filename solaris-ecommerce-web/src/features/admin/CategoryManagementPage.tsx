@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Plus, FolderTree, Image as ImageIcon, X } from 'lucide-react'
@@ -13,10 +13,38 @@ type CategoryFormData = {
   description: string
   parentId: string
   imageData: string | null
-  categoryType: 'MENU' | 'SUBMENU' | 'ITEM'
 }
 
-const emptyForm: CategoryFormData = { name: '', description: '', parentId: '', imageData: '', categoryType: 'ITEM' }
+const emptyForm: CategoryFormData = { name: '', description: '', parentId: '', imageData: '' }
+
+const sortCategoriesHierarchically = (categories: Category[]): Category[] => {
+  const childrenOf = (parentId: number | null) =>
+    categories
+      .filter((cat) => (cat.parentId ?? null) === parentId)
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+
+  const result: Category[] = []
+  const walk = (parentId: number | null) => {
+    childrenOf(parentId).forEach((cat) => {
+      result.push(cat)
+      walk(cat.id)
+    })
+  }
+  walk(null)
+  return result
+}
+
+const getCategoryDepth = (category: Category, categories: Category[]): number => {
+  let depth = 0
+  let current = category
+  while (current.parentId) {
+    const parent = categories.find((c) => c.id === current.parentId)
+    if (!parent) break
+    depth += 1
+    current = parent
+  }
+  return depth
+}
 
 const CategoryManagementPage = () => {
   const { t } = useTranslation()
@@ -30,12 +58,24 @@ const CategoryManagementPage = () => {
     queryFn: categoryService.getAllCategories,
   })
 
-  const topLevelCategories = (categories || []).filter((category) => !category.parentId)
+  const sortedCategories = useMemo(
+    () => sortCategoriesHierarchically(categories || []),
+    [categories]
+  )
+
+  const parentOptions = (categories || []).filter(
+    (cat) => !cat.systemCategory && cat.id !== selected?.id && cat.categoryType !== 'SUBMENU'
+  )
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['categories'] })
+    queryClient.invalidateQueries({ queryKey: ['category-tree'] })
+  }
 
   const createMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => categoryService.createCategory(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      invalidateAll()
       toast.success(t('admin.category.created'))
       closeModal()
     },
@@ -46,7 +86,7 @@ const CategoryManagementPage = () => {
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) =>
       categoryService.updateCategory(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      invalidateAll()
       toast.success(t('admin.category.updated'))
       closeModal()
     },
@@ -57,7 +97,7 @@ const CategoryManagementPage = () => {
     mutationFn: ({ id, active }: { id: number; active: boolean }) =>
       categoryService.toggleStatus(id, active),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      invalidateAll()
       toast.success(t('admin.category.statusUpdated'))
     },
     onError: (error: any) => toast.error(error?.response?.data?.message || t('admin.category.error')),
@@ -82,7 +122,6 @@ const CategoryManagementPage = () => {
       description: category.description || '',
       parentId: category.parentId ? String(category.parentId) : '',
       imageData: category.imageData || '',
-      categoryType: category.categoryType || 'ITEM',
     })
     setModalMode('edit')
   }
@@ -100,10 +139,16 @@ const CategoryManagementPage = () => {
       description: formData.description,
       parentId: formData.parentId ? Number(formData.parentId) : null,
       imageData: formData.imageData || null,
-      categoryType: formData.categoryType,
+      categoryType: 'ITEM',
     }
     if (modalMode === 'edit' && selected) {
-      updateMutation.mutate({ id: selected.id, data: payload })
+      const existingType = selected.categoryType === 'MENU' || selected.categoryType === 'SUBMENU'
+        ? selected.categoryType
+        : 'ITEM'
+      updateMutation.mutate({
+        id: selected.id,
+        data: { ...payload, categoryType: existingType },
+      })
     } else if (modalMode === 'create') {
       createMutation.mutate(payload)
     }
@@ -111,7 +156,7 @@ const CategoryManagementPage = () => {
 
   return (
     <>
-    <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">{t('admin.category.title')}</h1>
           <button onClick={openCreate} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
@@ -122,7 +167,7 @@ const CategoryManagementPage = () => {
 
         {isLoading ? (
           <div className="text-center py-12">{t('common.loading')}</div>
-        ) : !categories?.length ? (
+        ) : !sortedCategories.length ? (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <FolderTree className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600">{t('admin.category.noCategories')}</p>
@@ -140,53 +185,61 @@ const CategoryManagementPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {categories.map((category) => (
-                  <tr key={category.id} className={category.active === false ? 'bg-gray-50 opacity-75' : ''}>
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      <div className="flex items-center gap-2">
-                        {category.imageData ? (
-                          <img src={toImageSrc(category.imageData)} alt={category.name} className="w-8 h-8 rounded object-cover border" />
-                        ) : (
-                          <span className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-400">
-                            <ImageIcon className="w-4 h-4" />
-                          </span>
-                        )}
-                        {category.parentId ? <span className="text-gray-400">↳</span> : null}
-                        {category.name}
-                      </div>
-                      {category.systemCategory && (
-                        <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded">{t('admin.category.system')}</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{category.parentName || '-'}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{category.description || '-'}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 text-xs rounded-full ${category.active !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {category.active !== false ? t('admin.category.active') : t('admin.category.inactive')}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <ActionsMenu
-                        items={[
-                          {
-                            label: t('admin.actions.view'),
-                            onClick: () => { setSelected(category); setModalMode('view') },
-                          },
-                          {
-                            label: t('admin.actions.edit'),
-                            onClick: () => openEdit(category),
-                            hidden: category.systemCategory,
-                          },
-                          {
-                            label: category.active !== false ? t('admin.actions.disable') : t('admin.actions.enable'),
-                            onClick: () => toggleMutation.mutate({ id: category.id, active: category.active === false }),
-                            hidden: category.systemCategory,
-                          },
-                        ]}
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {sortedCategories.map((category) => {
+                  const depth = getCategoryDepth(category, categories || [])
+                  return (
+                    <tr key={category.id} className={category.active === false ? 'bg-gray-50 opacity-75' : ''}>
+                      <td className="px-4 py-3 font-medium text-gray-900">
+                        <div className="flex items-center gap-2" style={{ paddingLeft: `${depth * 24}px` }}>
+                          {depth > 0 && <span className="text-gray-400 text-sm">↳</span>}
+                          {category.imageData ? (
+                            <img src={toImageSrc(category.imageData)} alt={category.name} className="w-8 h-8 rounded object-cover border" />
+                          ) : (
+                            <span className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-400">
+                              <ImageIcon className="w-4 h-4" />
+                            </span>
+                          )}
+                          {category.name}
+                          {category.systemCategory && (
+                            <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded">{t('admin.category.system')}</span>
+                          )}
+                          {(category.categoryType === 'MENU' || category.categoryType === 'SUBMENU') && (
+                            <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded">
+                              {category.categoryType === 'MENU' ? 'Menú' : 'Sub-menú'}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{category.parentName || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{category.description || '-'}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 text-xs rounded-full ${category.active !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {category.active !== false ? t('admin.category.active') : t('admin.category.inactive')}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <ActionsMenu
+                          items={[
+                            {
+                              label: t('admin.actions.view'),
+                              onClick: () => { setSelected(category); setModalMode('view') },
+                            },
+                            {
+                              label: t('admin.actions.edit'),
+                              onClick: () => openEdit(category),
+                              hidden: category.systemCategory,
+                            },
+                            {
+                              label: category.active !== false ? t('admin.actions.disable') : t('admin.actions.enable'),
+                              onClick: () => toggleMutation.mutate({ id: category.id, active: category.active === false }),
+                              hidden: category.systemCategory,
+                            },
+                          ]}
+                        />
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -218,20 +271,9 @@ const CategoryManagementPage = () => {
                 <select value={formData.parentId} onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                   <option value="">{t('admin.category.noParent')}</option>
-                  {topLevelCategories
-                    .filter((category) => category.id !== selected?.id)
-                    .map((category) => (
-                      <option key={category.id} value={category.id}>{category.name}</option>
-                    ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t('admin.category.type')}</label>
-                <select value={formData.categoryType} onChange={(e) => setFormData({ ...formData, categoryType: e.target.value as 'MENU' | 'SUBMENU' | 'ITEM' })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="MENU">MENU (Categoría Principal)</option>
-                  <option value="SUBMENU">SUBMENU (Submenú)</option>
-                  <option value="ITEM">ITEM (Item)</option>
+                  {parentOptions.map((category) => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
                 </select>
               </div>
               <div>

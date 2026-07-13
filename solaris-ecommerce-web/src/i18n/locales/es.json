@@ -213,6 +213,10 @@
       "deleted": "Categoría eliminada exitosamente",
       "statusUpdated": "Estado de la categoría actualizado",
       "system": "Sistema",
+      "parent": "Categoría padre",
+      "noParent": "Sin categoría padre",
+      "image": "Imagen",
+      "uploadImage": "Subir imagen",
       "error": "Error al procesar la categoría"
     },
     "customer": {
