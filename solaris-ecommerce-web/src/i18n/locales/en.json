@@ -243,6 +243,20 @@
     "menuConfig": {
       "title": "Menu Configuration"
     },
+    "featuredCategories": {
+      "title": "Featured Categories",
+      "subtitle": "Choose which categories to show in the store carousel",
+      "add": "Feature category",
+      "selectCategory": "Category",
+      "chooseCategory": "Select category...",
+      "empty": "No featured categories",
+      "created": "Category featured successfully",
+      "deleted": "Category removed successfully",
+      "error": "Error processing featured category",
+      "order": "Order",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
     "appearance": {
       "title": "Appearance Configuration",
       "themePresets": "Theme Presets",

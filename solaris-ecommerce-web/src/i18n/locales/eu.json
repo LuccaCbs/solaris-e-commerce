@@ -237,6 +237,20 @@
     "menuConfig": {
       "title": "Menuen Konfigurazioa"
     },
+    "featuredCategories": {
+      "title": "Erakutsitako Kategoriak",
+      "subtitle": "Aukeratu dendako karruselean erakutsiko diren kategoriak",
+      "add": "Kategoria erakutsi",
+      "selectCategory": "Kategoria",
+      "chooseCategory": "Aukeratu kategoria...",
+      "empty": "Ez dago erakutsitako kategoriarik",
+      "created": "Kategoria behar bezala erakutsi da",
+      "deleted": "Kategoria behar bezala kendu da",
+      "error": "Errorea erakutsitako kategoria prozesatzean",
+      "order": "Ordena",
+      "active": "Aktiboa",
+      "inactive": "Inaktiboa"
+    },
     "appearance": {
       "title": "Itxuraren Konfigurazioa",
       "themePresets": "Aurrez definitutako gaiak",

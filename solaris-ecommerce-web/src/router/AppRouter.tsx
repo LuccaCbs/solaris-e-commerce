@@ -10,6 +10,7 @@ import CustomerManagementPage from '../features/admin/CustomerManagementPage'
 import DashboardPage from '../features/admin/DashboardPage'
 import StoreConfigPage from '../features/admin/StoreConfigPage'
 import FeaturedProductsPage from '../features/admin/FeaturedProductsPage'
+import FeaturedCategoriesPage from '../features/admin/FeaturedCategoriesPage'
 import AppearanceConfigPage from '../features/admin/AppearanceConfigPage'
 import MenuConfigPage from '../features/admin/MenuConfigPage'
 import ProfilePage from '../features/profile/ProfilePage'
@@ -39,6 +40,7 @@ const AppRouter = () => {
         <Route path="categories" element={<CategoryManagementPage />} />
         <Route path="menu-config" element={<MenuConfigPage />} />
         <Route path="featured" element={<FeaturedProductsPage />} />
+        <Route path="featured-categories" element={<FeaturedCategoriesPage />} />
         <Route path="customers" element={<CustomerManagementPage />} />
         <Route path="appearance" element={<AppearanceConfigPage />} />
         <Route path="config" element={<StoreConfigPage />} />

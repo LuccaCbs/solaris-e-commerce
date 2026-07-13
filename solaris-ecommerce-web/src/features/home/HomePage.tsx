@@ -11,6 +11,7 @@ import CategoryProductCarousel from '../../components/CategoryProductCarousel'
 import ProductDetailModal from '../../components/ProductDetailModal'
 import StorefrontProductCard from '../../components/StorefrontProductCard'
 import { featuredProductService, FeaturedProduct } from '../../api/featuredProductService'
+import { featuredCategoryService } from '../../api/featuredCategoryService'
 import { categoryService } from '../../api/categoryService'
 import { productService } from '../../api/productService'
 import { productImageService } from '../../api/productImageService'
@@ -43,6 +44,11 @@ const HomePage = () => {
   const { data: storefront, isLoading } = useQuery({
     queryKey: ['public-storefront'],
     queryFn: featuredProductService.getPublic,
+  })
+
+  const { data: featuredCategories = [] } = useQuery({
+    queryKey: ['public-featured-categories'],
+    queryFn: featuredCategoryService.getPublic,
   })
 
   const displayMode = storefront?.displayMode || 'INDIVIDUAL'
@@ -128,7 +134,7 @@ const HomePage = () => {
       <AppHeader showSearch={false} />
       <HeroBanner />
       <FullWidthProductSlider products={filteredFeatured} onSelect={setSelectedProduct} />
-      <ActiveCategorySlider categories={categories} />
+      <ActiveCategorySlider categories={featuredCategories} />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-8">

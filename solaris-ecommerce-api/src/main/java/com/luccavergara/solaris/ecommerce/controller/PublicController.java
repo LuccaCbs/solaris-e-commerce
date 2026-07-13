@@ -1,7 +1,9 @@
 package com.luccavergara.solaris.ecommerce.controller;
 
+import com.luccavergara.solaris.ecommerce.dto.FeaturedCategoryResponse;
 import com.luccavergara.solaris.ecommerce.dto.FeaturedProductResponse;
 import com.luccavergara.solaris.ecommerce.dto.PublicStorefrontResponse;
+import com.luccavergara.solaris.ecommerce.service.FeaturedCategoryService;
 import com.luccavergara.solaris.ecommerce.service.FeaturedProductService;
 import com.luccavergara.solaris.ecommerce.service.StoreConfigService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PublicController {
 
+    private final FeaturedCategoryService featuredCategoryService;
     private final FeaturedProductService featuredProductService;
     private final StoreConfigService storeConfigService;
 
@@ -34,5 +37,10 @@ public class PublicController {
     @GetMapping("/featured-products")
     public ResponseEntity<List<FeaturedProductResponse>> getFeaturedProducts() {
         return ResponseEntity.ok(featuredProductService.getActiveForStorefront());
+    }
+
+    @GetMapping("/featured-categories")
+    public ResponseEntity<List<FeaturedCategoryResponse>> getFeaturedCategories() {
+        return ResponseEntity.ok(featuredCategoryService.getActiveForStorefront());
     }
 }

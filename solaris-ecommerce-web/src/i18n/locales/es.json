@@ -273,6 +273,20 @@
     "menuConfig": {
       "title": "Configuración de Menús"
     },
+    "featuredCategories": {
+      "title": "Categorías Expuestas",
+      "subtitle": "Elegí qué categorías mostrar en el carrusel de la tienda",
+      "add": "Exponer categoría",
+      "selectCategory": "Categoría",
+      "chooseCategory": "Seleccionar categoría...",
+      "empty": "No hay categorías expuestas",
+      "created": "Categoría expuesta exitosamente",
+      "deleted": "Categoría retirada exitosamente",
+      "error": "Error al procesar la categoría expuesta",
+      "order": "Orden",
+      "active": "Activa",
+      "inactive": "Inactiva"
+    },
     "featured": {
       "title": "Productos expuestos",
       "subtitle": "Elegí qué productos mostrar en la tienda y con qué tipo de card",

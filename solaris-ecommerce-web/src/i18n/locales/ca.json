@@ -237,6 +237,20 @@
     "menuConfig": {
       "title": "Configuració de Menús"
     },
+    "featuredCategories": {
+      "title": "Categories Exposades",
+      "subtitle": "Tria quines categories mostrar al carrusel de la botiga",
+      "add": "Exposar categoria",
+      "selectCategory": "Categoria",
+      "chooseCategory": "Seleccionar categoria...",
+      "empty": "No hi ha categories exposades",
+      "created": "Categoria exposada exitosament",
+      "deleted": "Categoria retirada exitosament",
+      "error": "Error al processar la categoria exposada",
+      "order": "Ordre",
+      "active": "Activa",
+      "inactive": "Inactiva"
+    },
     "appearance": {
       "title": "Configuració d'Apariència",
       "themePresets": "Temes predefinits",

@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { toImageSrc } from '../api/productImageService'
-import { Category } from '../types/category'
+import { FeaturedCategory } from '../api/featuredCategoryService'
 
 type ActiveCategorySliderProps = {
-  categories: Category[]
+  categories: FeaturedCategory[]
 }
 
 const VISIBLE_COUNT = 3
@@ -13,7 +13,7 @@ const VISIBLE_COUNT = 3
 const ActiveCategorySlider = ({ categories }: ActiveCategorySliderProps) => {
   const [startIndex, setStartIndex] = useState(0)
 
-  const activeCategories = categories.filter((category) => category.active !== false)
+  const activeCategories = categories.filter((category) => category.active)
   if (!activeCategories.length) return null
 
   const hasCarousel = activeCategories.length > VISIBLE_COUNT
@@ -50,12 +50,12 @@ const ActiveCategorySlider = ({ categories }: ActiveCategorySliderProps) => {
             {visibleCategories.map((category, index) => (
               <Link
                 key={`${category.id}-${startIndex}-${index}`}
-                to={`/?categoryId=${category.id}`}
+                to={`/?categoryId=${category.categoryId}`}
                 className="group relative min-h-[360px] md:min-h-[460px] overflow-hidden rounded-xl bg-white shadow-md border border-white/60"
               >
                 {category.imageData ? (
                   <img
-                    src={toImageSrc(category.imageData)}
+                    src={toImageSrc(category.imageData!)}
                     alt={category.name}
                     className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   />

@@ -7,6 +7,7 @@ import {
   Users,
   Settings,
   Star,
+  Tags,
   Palette,
   Menu,
 } from 'lucide-react'
@@ -18,6 +19,7 @@ const adminNavItems = [
   { path: '/admin/categories', labelKey: 'nav.categories', icon: FolderTree },
   { path: '/admin/menu-config', labelKey: 'admin.menuConfig.title', icon: Menu },
   { path: '/admin/featured', labelKey: 'nav.featured', icon: Star },
+  { path: '/admin/featured-categories', labelKey: 'admin.featuredCategories.title', icon: Tags },
   { path: '/admin/customers', labelKey: 'admin.customer.title', icon: Users },
   { path: '/admin/appearance', labelKey: 'admin.appearance.title', icon: Palette },
   { path: '/admin/config', labelKey: 'admin.config.title', icon: Settings },
