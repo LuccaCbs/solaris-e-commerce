@@ -263,10 +263,19 @@
       "heroSubtitle": "Banneraren azpititulua",
       "heroImages": "Banneraren irudiak",
       "uploadImages": "Igo irudiak",
+      "aboutUs": "Guri Buruz",
+      "aboutUsTitle": "Guri Buruz Izenburua",
+      "aboutUsText": "Guri Buruz Testua",
+      "contactPhone": "Kontaktu Telefonoa",
+      "contactEmail": "Kontaktu Emaila",
+      "socialMedia": "Sare Sozialak",
       "save": "Gorde aldaketak",
       "reset": "Berrezarri",
       "updated": "Itzura ondo eguneratua",
       "error": "Errorea itzura eguneratzean"
+    },
+    "shop": {
+      "title": "Denda"
     }
   }
 }

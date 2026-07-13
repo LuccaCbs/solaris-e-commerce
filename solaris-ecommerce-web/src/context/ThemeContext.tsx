@@ -24,6 +24,16 @@ type AppearanceConfig = {
   heroTitle: string
   heroSubtitle: string
   heroImages: string[]
+  aboutUsTitle: string
+  aboutUsText: string
+  contactPhone: string
+  contactEmail: string
+  instagramEnabled: boolean
+  instagramUrl: string
+  facebookEnabled: boolean
+  facebookUrl: string
+  linkedinEnabled: boolean
+  linkedinUrl: string
 }
 
 const defaultAppearance: AppearanceConfig = {
@@ -34,6 +44,16 @@ const defaultAppearance: AppearanceConfig = {
   heroTitle: '',
   heroSubtitle: '',
   heroImages: [],
+  aboutUsTitle: '',
+  aboutUsText: '',
+  contactPhone: '',
+  contactEmail: '',
+  instagramEnabled: false,
+  instagramUrl: '',
+  facebookEnabled: false,
+  facebookUrl: '',
+  linkedinEnabled: false,
+  linkedinUrl: '',
 }
 
 const ThemeContext = createContext<AppearanceConfig>(defaultAppearance)
@@ -57,6 +77,16 @@ const parseConfigList = (configs: any[] | undefined): AppearanceConfig => {
     heroTitle: map.get('appearance.hero_title') || '',
     heroSubtitle: map.get('appearance.hero_subtitle') || '',
     heroImages,
+    aboutUsTitle: map.get('appearance.about_us_title') || '',
+    aboutUsText: map.get('appearance.about_us_text') || '',
+    contactPhone: map.get('appearance.contact_phone') || '',
+    contactEmail: map.get('appearance.contact_email') || '',
+    instagramEnabled: map.get('appearance.instagram_enabled') === 'true',
+    instagramUrl: map.get('appearance.instagram_url') || '',
+    facebookEnabled: map.get('appearance.facebook_enabled') === 'true',
+    facebookUrl: map.get('appearance.facebook_url') || '',
+    linkedinEnabled: map.get('appearance.linkedin_enabled') === 'true',
+    linkedinUrl: map.get('appearance.linkedin_url') || '',
   }
 }
 

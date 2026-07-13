@@ -320,10 +320,19 @@
       "heroSubtitle": "Subtítulo del banner",
       "heroImages": "Imágenes del banner",
       "uploadImages": "Subir imágenes",
+      "aboutUs": "Sobre Nosotros",
+      "aboutUsTitle": "Título de Sobre Nosotros",
+      "aboutUsText": "Texto de Sobre Nosotros",
+      "contactPhone": "Teléfono de contacto",
+      "contactEmail": "Email de contacto",
+      "socialMedia": "Redes Sociales",
       "save": "Guardar cambios",
       "reset": "Restablecer",
       "updated": "Apariencia actualizada exitosamente",
       "error": "Error al actualizar la apariencia"
+    },
+    "shop": {
+      "title": "Tienda"
     }
   }
 }

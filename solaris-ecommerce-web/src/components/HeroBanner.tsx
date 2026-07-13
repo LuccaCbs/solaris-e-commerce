@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useAppearance } from '../context/ThemeContext'
 import { toImageSrc } from '../api/productImageService'
 
@@ -61,6 +62,12 @@ const HeroBanner = () => {
                 {appearance.heroSubtitle}
               </p>
             )}
+            <Link
+              to="/shop"
+              className="inline-block mt-6 px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition"
+            >
+              Shop
+            </Link>
           </div>
         </div>
       </div>

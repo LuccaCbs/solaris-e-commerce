@@ -32,6 +32,16 @@ const AppearanceConfigPage = () => {
         return []
       }
     })(),
+    aboutUsTitle: configMap.get('appearance.about_us_title') || '',
+    aboutUsText: configMap.get('appearance.about_us_text') || '',
+    contactPhone: configMap.get('appearance.contact_phone') || '',
+    contactEmail: configMap.get('appearance.contact_email') || '',
+    instagramEnabled: configMap.get('appearance.instagram_enabled') === 'true',
+    instagramUrl: configMap.get('appearance.instagram_url') || '',
+    facebookEnabled: configMap.get('appearance.facebook_enabled') === 'true',
+    facebookUrl: configMap.get('appearance.facebook_url') || '',
+    linkedinEnabled: configMap.get('appearance.linkedin_enabled') === 'true',
+    linkedinUrl: configMap.get('appearance.linkedin_url') || '',
   })
 
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
@@ -86,6 +96,16 @@ const AppearanceConfigPage = () => {
       { key: 'appearance.hero_title', value: formData.heroTitle },
       { key: 'appearance.hero_subtitle', value: formData.heroSubtitle },
       { key: 'appearance.hero_images', value: JSON.stringify(heroImagesBase64) },
+      { key: 'appearance.about_us_title', value: formData.aboutUsTitle },
+      { key: 'appearance.about_us_text', value: formData.aboutUsText },
+      { key: 'appearance.contact_phone', value: formData.contactPhone },
+      { key: 'appearance.contact_email', value: formData.contactEmail },
+      { key: 'appearance.instagram_enabled', value: String(formData.instagramEnabled) },
+      { key: 'appearance.instagram_url', value: formData.instagramUrl },
+      { key: 'appearance.facebook_enabled', value: String(formData.facebookEnabled) },
+      { key: 'appearance.facebook_url', value: formData.facebookUrl },
+      { key: 'appearance.linkedin_enabled', value: String(formData.linkedinEnabled) },
+      { key: 'appearance.linkedin_url', value: formData.linkedinUrl },
     ]
 
     for (const update of updates) {
@@ -110,6 +130,16 @@ const AppearanceConfigPage = () => {
             return []
           }
         })(),
+        aboutUsTitle: configMap.get('appearance.about_us_title') || '',
+        aboutUsText: configMap.get('appearance.about_us_text') || '',
+        contactPhone: configMap.get('appearance.contact_phone') || '',
+        contactEmail: configMap.get('appearance.contact_email') || '',
+        instagramEnabled: configMap.get('appearance.instagram_enabled') === 'true',
+        instagramUrl: configMap.get('appearance.instagram_url') || '',
+        facebookEnabled: configMap.get('appearance.facebook_enabled') === 'true',
+        facebookUrl: configMap.get('appearance.facebook_url') || '',
+        linkedinEnabled: configMap.get('appearance.linkedin_enabled') === 'true',
+        linkedinUrl: configMap.get('appearance.linkedin_url') || '',
       }
       setFormData(resetData)
       setPendingFiles([])
@@ -320,6 +350,113 @@ const AppearanceConfigPage = () => {
                       </button>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
+            <div className="flex items-center gap-3 mb-6">
+              <Palette className="w-6 h-6 text-gray-500" />
+              <h2 className="text-lg font-semibold text-gray-900">{t('admin.appearance.aboutUs')}</h2>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.appearance.aboutUsTitle')}</label>
+                <input
+                  type="text"
+                  value={formData.aboutUsTitle}
+                  onChange={(e) => setFormData({ ...formData, aboutUsTitle: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.appearance.aboutUsText')}</label>
+                <textarea
+                  value={formData.aboutUsText}
+                  onChange={(e) => setFormData({ ...formData, aboutUsText: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.appearance.contactPhone')}</label>
+                <input
+                  type="text"
+                  value={formData.contactPhone}
+                  onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.appearance.contactEmail')}</label>
+                <input
+                  type="email"
+                  value={formData.contactEmail}
+                  onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">{t('admin.appearance.socialMedia')}</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="checkbox"
+                      id="instagram-enabled"
+                      checked={formData.instagramEnabled}
+                      onChange={(e) => setFormData({ ...formData, instagramEnabled: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <label htmlFor="instagram-enabled" className="text-sm text-gray-700">Instagram</label>
+                    {formData.instagramEnabled && (
+                      <input
+                        type="url"
+                        placeholder="https://instagram.com/..."
+                        value={formData.instagramUrl}
+                        onChange={(e) => setFormData({ ...formData, instagramUrl: e.target.value })}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="checkbox"
+                      id="facebook-enabled"
+                      checked={formData.facebookEnabled}
+                      onChange={(e) => setFormData({ ...formData, facebookEnabled: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <label htmlFor="facebook-enabled" className="text-sm text-gray-700">Facebook</label>
+                    {formData.facebookEnabled && (
+                      <input
+                        type="url"
+                        placeholder="https://facebook.com/..."
+                        value={formData.facebookUrl}
+                        onChange={(e) => setFormData({ ...formData, facebookUrl: e.target.value })}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="checkbox"
+                      id="linkedin-enabled"
+                      checked={formData.linkedinEnabled}
+                      onChange={(e) => setFormData({ ...formData, linkedinEnabled: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <label htmlFor="linkedin-enabled" className="text-sm text-gray-700">LinkedIn</label>
+                    {formData.linkedinEnabled && (
+                      <input
+                        type="url"
+                        placeholder="https://linkedin.com/..."
+                        value={formData.linkedinUrl}
+                        onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

@@ -263,10 +263,19 @@
       "heroSubtitle": "Subtítol del banner",
       "heroImages": "Imatges del banner",
       "uploadImages": "Pujar imatges",
+      "aboutUs": "Sobre Nosaltres",
+      "aboutUsTitle": "Títol de Sobre Nosaltres",
+      "aboutUsText": "Text de Sobre Nosaltres",
+      "contactPhone": "Telèfon de contacte",
+      "contactEmail": "Correu de contacte",
+      "socialMedia": "Xarxes Socials",
       "save": "Desar canvis",
       "reset": "Restablir",
       "updated": "Apariència actualitzada exitosament",
       "error": "Error al actualitzar l'apariència"
+    },
+    "shop": {
+      "title": "Botiga"
     }
   }
 }

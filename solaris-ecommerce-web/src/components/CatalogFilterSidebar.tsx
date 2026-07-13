@@ -17,7 +17,7 @@ type CatalogFilterSidebarProps = {
 
 const CatalogFilterSidebar = ({ filters, categories, onChange }: CatalogFilterSidebarProps) => {
   const { t } = useTranslation()
-  const activeCategories = categories.filter((c) => c.active !== false)
+  const activeCategories = categories.filter((c) => c.active !== false && !c.systemCategory)
 
   const update = (partial: Partial<CatalogFilters>) => {
     onChange({ ...filters, ...partial })

@@ -269,10 +269,19 @@
       "heroSubtitle": "Banner Subtitle",
       "heroImages": "Banner Images",
       "uploadImages": "Upload Images",
+      "aboutUs": "About Us",
+      "aboutUsTitle": "About Us Title",
+      "aboutUsText": "About Us Text",
+      "contactPhone": "Contact Phone",
+      "contactEmail": "Contact Email",
+      "socialMedia": "Social Media",
       "save": "Save Changes",
       "reset": "Reset",
       "updated": "Appearance updated successfully",
       "error": "Error updating appearance"
+    },
+    "shop": {
+      "title": "Shop"
     }
   }
 }
