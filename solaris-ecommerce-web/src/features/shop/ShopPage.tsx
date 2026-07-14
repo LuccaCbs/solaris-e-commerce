@@ -50,6 +50,7 @@ const ShopPage = () => {
     setFilters((prev) => ({
       ...prev,
       selectedCategory: categoryIdParam ? Number(categoryIdParam) : null,
+      selectedCategoryNames: [],
     }))
   }, [categoryIdParam])
 

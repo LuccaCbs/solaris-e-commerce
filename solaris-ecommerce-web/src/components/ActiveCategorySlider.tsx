@@ -50,7 +50,7 @@ const ActiveCategorySlider = ({ categories }: ActiveCategorySliderProps) => {
             {visibleCategories.map((category, index) => (
               <Link
                 key={`${category.id}-${startIndex}-${index}`}
-                to={`/?categoryId=${category.categoryId}`}
+                to={`/shop?categoryId=${category.categoryId}`}
                 className="group relative min-h-[360px] md:min-h-[460px] overflow-hidden rounded-xl bg-white shadow-md border border-white/60"
               >
                 {category.imageData ? (
