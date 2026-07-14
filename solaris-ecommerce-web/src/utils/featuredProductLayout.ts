@@ -21,6 +21,7 @@ export const filterFeaturedProducts = (
     priceMin: string
     priceMax: string
     categoryNames: Map<number, string>
+    selectedCategoryNames?: string[]
   }
 ) => {
   const min = filters.priceMin ? Number(filters.priceMin) : null
@@ -36,7 +37,10 @@ export const filterFeaturedProducts = (
       item.productName.toLowerCase().includes(search) ||
       item.productDescription?.toLowerCase().includes(search)
     const matchesCategory =
-      !selectedCategoryName || item.categoryName === selectedCategoryName
+      !selectedCategoryName ||
+      (filters.selectedCategoryNames && filters.selectedCategoryNames.length > 0
+        ? filters.selectedCategoryNames.includes(item.categoryName || '')
+        : item.categoryName === selectedCategoryName)
     const matchesMin = min === null || item.price >= min
     const matchesMax = max === null || item.price <= max
     return matchesSearch && matchesCategory && matchesMin && matchesMax

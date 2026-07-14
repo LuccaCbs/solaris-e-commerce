@@ -26,6 +26,7 @@ const ShopPage = () => {
     selectedCategory: null,
     priceMin: '',
     priceMax: '',
+    selectedCategoryNames: [],
   })
   const [selectedProduct, setSelectedProduct] = useState<FeaturedProduct | null>(null)
 
@@ -33,8 +34,8 @@ const ShopPage = () => {
   const productIdParam = searchParams.get('productId')
 
   const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: categoryService.getAllCategories,
+    queryKey: ['category-filter-tree'],
+    queryFn: categoryService.getFilterTree,
   })
 
   const { data: storefront, isLoading } = useQuery({
@@ -87,7 +88,26 @@ const ShopPage = () => {
     () => new Map(categories.map((category) => [category.id, category.name])),
     [categories]
   )
-  const filteredFeatured = filterFeaturedProducts(featured, { ...filters, categoryNames })
+
+  const getCategorySubcategoryIds = (categoryId: number | null): number[] => {
+    if (categoryId === null) return []
+    const category = categories.find((c) => c.id === categoryId)
+    if (!category) return [categoryId]
+    if (category.subcategories && category.subcategories.length > 0) {
+      return [categoryId, ...category.subcategories.map((sub) => sub.id)]
+    }
+    return [categoryId]
+  }
+
+  const selectedCategoryIds = getCategorySubcategoryIds(filters.selectedCategory)
+  const selectedCategoryNames = selectedCategoryIds.map((id) => categoryNames.get(id)).filter(Boolean) as string[]
+
+  const filteredFeatured = filterFeaturedProducts(featured, {
+    ...filters,
+    selectedCategory: filters.selectedCategory,
+    selectedCategoryNames,
+    categoryNames,
+  })
   const groupedByCardType = useMemo(() => {
     const groups: Record<string, FeaturedProduct[]> = { BASIC: [], COMPACT: [], MENU: [] }
     filteredFeatured.forEach((item) => groups[item.cardType || 'BASIC'].push(item))

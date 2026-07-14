@@ -164,6 +164,16 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
+    public List<CategoryResponse> getFilterTree() {
+        return categoryRepository.findByParentIsNull().stream()
+                .filter(category -> Boolean.TRUE.equals(category.getActive()))
+                .filter(category -> !Boolean.TRUE.equals(category.getSystemCategory()))
+                .filter(category -> category.getCategoryType() == Category.CategoryType.MENU)
+                .map(this::buildFilterMenuNode)
+                .filter(menu -> menu.getSubcategories() != null && !menu.getSubcategories().isEmpty())
+                .collect(Collectors.toList());
+    }
+
     private CategoryResponse buildMenuNode(Category menu) {
         CategoryResponse response = mapToResponse(menu);
         List<CategoryResponse> submenus = categoryRepository.findByParentId(menu.getId()).stream()
@@ -175,7 +185,32 @@ public class CategoryService {
         return response;
     }
 
+    private CategoryResponse buildFilterMenuNode(Category menu) {
+        CategoryResponse response = mapToResponse(menu);
+        List<CategoryResponse> submenus = categoryRepository.findByParentId(menu.getId()).stream()
+                .filter(child -> Boolean.TRUE.equals(child.getActive()))
+                .filter(child -> child.getCategoryType() == Category.CategoryType.SUBMENU)
+                .map(this::buildFilterSubmenuNode)
+                .filter(submenu -> submenu.getProducts() != null && !submenu.getProducts().isEmpty())
+                .collect(Collectors.toList());
+        response.setSubcategories(submenus);
+        return response;
+    }
+
     private CategoryResponse buildSubmenuNode(Category submenu) {
+        CategoryResponse response = mapToResponse(submenu);
+        List<MenuProductSummary> products = productRepository.findByCategoryIdAndActiveTrue(submenu.getId()).stream()
+                .map(product -> MenuProductSummary.builder()
+                        .id(product.getId())
+                        .name(product.getName())
+                        .build())
+                .collect(Collectors.toList());
+        response.setProducts(products);
+        response.setSubcategories(Collections.emptyList());
+        return response;
+    }
+
+    private CategoryResponse buildFilterSubmenuNode(Category submenu) {
         CategoryResponse response = mapToResponse(submenu);
         List<MenuProductSummary> products = productRepository.findByCategoryIdAndActiveTrue(submenu.getId()).stream()
                 .map(product -> MenuProductSummary.builder()

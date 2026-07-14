@@ -17,6 +17,11 @@ export const categoryService = {
     return response.data
   },
 
+  getFilterTree: async (): Promise<Category[]> => {
+    const response = await apiClient.get('/categories/filter-tree')
+    return response.data
+  },
+
   getCategoryById: async (id: number): Promise<Category> => {
     const response = await apiClient.get(`/categories/${id}`)
     return response.data

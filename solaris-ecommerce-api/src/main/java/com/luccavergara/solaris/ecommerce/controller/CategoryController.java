@@ -53,6 +53,11 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getCategoryTree());
     }
 
+    @GetMapping("/filter-tree")
+    public ResponseEntity<List<CategoryResponse>> getFilterTree() {
+        return ResponseEntity.ok(categoryService.getFilterTree());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
