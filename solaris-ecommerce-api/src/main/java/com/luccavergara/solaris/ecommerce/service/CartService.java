@@ -30,6 +30,11 @@ public class CartService {
     private final ProductRepository productRepository;
 
     public CartResponse getOrCreateCart(Long userId, String cartIdentifier) {
+        Cart cart = getOrCreateCartEntity(userId, cartIdentifier);
+        return mapToResponse(cart);
+    }
+
+    private Cart getOrCreateCartEntity(Long userId, String cartIdentifier) {
         Cart cart;
 
         if (cartIdentifier != null) {
@@ -56,12 +61,12 @@ public class CartService {
             }
         }
 
-        return mapToResponse(cart);
+        return cart;
     }
 
     public CartResponse addItemToCart(Long userId, String cartIdentifier, CartItemRequest request) {
-        Cart cart = getCartEntity(userId, cartIdentifier);
-        
+        Cart cart = getOrCreateCartEntity(userId, cartIdentifier);
+
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
