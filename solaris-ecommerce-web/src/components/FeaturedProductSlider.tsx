@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { featuredProductService } from '../api/featuredProductService'
-import StorefrontProductCard from './StorefrontProductCard'
+import { featuredProductService, FeaturedProduct } from '../api/featuredProductService'
+import ProductSliderCard from './productCards/ProductSliderCard'
+import ProductDetailModal from './ProductDetailModal'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+
+const VISIBLE_COUNT = 5
 
 const FeaturedProductSlider = () => {
   const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = useState(0)
-  const itemsPerPage = 5
+  const [selectedProduct, setSelectedProduct] = useState<FeaturedProduct | null>(null)
 
   const { data: storefront, isLoading } = useQuery({
     queryKey: ['public-storefront'],
@@ -16,19 +19,19 @@ const FeaturedProductSlider = () => {
   })
 
   const featured = storefront?.products || []
-
-  const totalPages = Math.ceil(featured.length / itemsPerPage)
+  const hasCarousel = featured.length > VISIBLE_COUNT
+  const maxIndex = Math.max(0, featured.length - VISIBLE_COUNT)
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % totalPages)
+    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1))
   }
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + totalPages) % totalPages)
+    setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1))
   }
 
   const goToSlide = (index: number) => {
-    setCurrentIndex(index)
+    setCurrentIndex(Math.min(index, maxIndex))
   }
 
   if (isLoading) {
@@ -51,62 +54,75 @@ const FeaturedProductSlider = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('catalog.featuredProducts')}</h2>
+    <>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('catalog.featuredProducts')}</h2>
 
-      <div className="relative">
-        <button
-          onClick={prevSlide}
-          disabled={totalPages <= 1}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 p-3 rounded-full bg-white shadow-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
+        <div className="relative">
+          {hasCarousel && (
+            <button
+              type="button"
+              onClick={prevSlide}
+              aria-label="Anterior"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 p-3 rounded-full bg-white shadow-lg hover:bg-gray-50 transition-all duration-300"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          )}
 
-        <div className="overflow-hidden">
-          <div
-            className="flex gap-6 transition-transform duration-500 ease-in-out"
-            style={{
-              transform: `translateX(-${currentIndex * 100}%)`,
-            }}
-          >
-            {Array.from({ length: totalPages }).map((_, pageIndex) => (
-              <div key={pageIndex} className="flex-shrink-0 w-full flex gap-6">
-                {featured
-                  .slice(pageIndex * itemsPerPage, (pageIndex + 1) * itemsPerPage)
-                  .map((item) => (
-                    <div key={item.id} className="w-[calc(20%-14.4px)]">
-                      <StorefrontProductCard item={item} onSelect={() => {}} />
-                    </div>
-                  ))}
-              </div>
+          <div className="overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{
+                width: `${(featured.length / VISIBLE_COUNT) * 100}%`,
+                transform: `translateX(-${(currentIndex / featured.length) * 100}%)`,
+              }}
+            >
+              {featured.map((item) => (
+                <div
+                  key={item.id}
+                  className="px-3"
+                  style={{ width: `${100 / featured.length}%` }}
+                >
+                  <ProductSliderCard item={item} onSelect={setSelectedProduct} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {hasCarousel && (
+            <button
+              type="button"
+              onClick={nextSlide}
+              aria-label="Siguiente"
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 p-3 rounded-full bg-white shadow-lg hover:bg-gray-50 transition-all duration-300"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          )}
+        </div>
+
+        {hasCarousel && (
+          <div className="flex justify-center gap-2 mt-6">
+            {Array.from({ length: maxIndex + 1 }).map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => goToSlide(index)}
+                aria-label={`Ir al producto ${index + 1}`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  index === currentIndex ? 'bg-gray-900 w-6' : 'bg-gray-300 hover:bg-gray-400 w-2'
+                }`}
+              />
             ))}
           </div>
-        </div>
-
-        <button
-          onClick={nextSlide}
-          disabled={totalPages <= 1}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 p-3 rounded-full bg-white shadow-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </button>
+        )}
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-6">
-          {Array.from({ length: totalPages }).map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex ? 'bg-gray-900 w-6' : 'bg-gray-300 hover:bg-gray-400'
-              }`}
-            />
-          ))}
-        </div>
+      {selectedProduct && (
+        <ProductDetailModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
       )}
-    </div>
+    </>
   )
 }
 
