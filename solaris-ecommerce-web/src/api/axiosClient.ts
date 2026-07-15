@@ -37,9 +37,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      const publicPaths = ['/', '/catalog', '/login', '/register', '/verify-email']
+      const publicPaths = ['/', '/catalog', '/shop', '/cart', '/login', '/register', '/verify-email']
       const isPublicPath = publicPaths.some(
-        (path) => window.location.pathname === path || window.location.pathname.startsWith('/catalog')
+        (path) =>
+          window.location.pathname === path ||
+          window.location.pathname.startsWith('/catalog') ||
+          window.location.pathname.startsWith('/shop')
       )
       if (!isPublicPath) {
         localStorage.removeItem('token')

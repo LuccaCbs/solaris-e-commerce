@@ -17,6 +17,7 @@ logs/
 .env
 .env.local
 .env.*.local
+**/application-local.yml
 
 # Build
 target/

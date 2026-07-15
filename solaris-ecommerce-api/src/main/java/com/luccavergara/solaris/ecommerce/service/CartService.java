@@ -10,6 +10,7 @@ import com.luccavergara.solaris.ecommerce.entity.User;
 import com.luccavergara.solaris.ecommerce.repository.CartItemRepository;
 import com.luccavergara.solaris.ecommerce.repository.CartRepository;
 import com.luccavergara.solaris.ecommerce.repository.ProductRepository;
+import com.luccavergara.solaris.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,10 +29,11 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     public CartResponse getOrCreateCart(Long userId, String cartIdentifier) {
         Cart cart = getOrCreateCartEntity(userId, cartIdentifier);
-        return mapToResponse(cart);
+        return mapToResponse(loadCartWithItems(cart.getId()));
     }
 
     private Cart getOrCreateCartEntity(Long userId, String cartIdentifier) {
@@ -50,14 +52,20 @@ public class CartService {
             }
 
             if (cart == null) {
-                cart = Cart.builder()
+                Cart.CartBuilder cartBuilder = Cart.builder()
                         .cartIdentifier(UUID.randomUUID().toString())
                         .totalAmount(BigDecimal.ZERO)
                         .totalItems(0)
                         .createdAt(LocalDateTime.now())
-                        .updatedAt(LocalDateTime.now())
-                        .build();
-                cart = cartRepository.save(cart);
+                        .updatedAt(LocalDateTime.now());
+
+                if (userId != null) {
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new RuntimeException("User not found"));
+                    cartBuilder.user(user);
+                }
+
+                cart = cartRepository.save(cartBuilder.build());
             }
         }
 
@@ -70,7 +78,7 @@ public class CartService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        if (!product.getActive()) {
+        if (!Boolean.TRUE.equals(product.getActive())) {
             throw new RuntimeException("Product is not available");
         }
 
@@ -100,8 +108,8 @@ public class CartService {
         }
 
         updateCartTotals(cart);
-        cart = cartRepository.save(cart);
-        return mapToResponse(cart);
+        cartRepository.save(cart);
+        return mapToResponse(loadCartWithItems(cart.getId()));
     }
 
     public CartResponse updateCartItem(Long userId, String cartIdentifier, Long itemId, Integer quantity) {
@@ -128,8 +136,8 @@ public class CartService {
         }
 
         updateCartTotals(cart);
-        cart = cartRepository.save(cart);
-        return mapToResponse(cart);
+        cartRepository.save(cart);
+        return mapToResponse(loadCartWithItems(cart.getId()));
     }
 
     public CartResponse removeCartItem(Long userId, String cartIdentifier, Long itemId) {
@@ -146,8 +154,8 @@ public class CartService {
         cart.getItems().removeIf(item -> item.getId().equals(itemId));
 
         updateCartTotals(cart);
-        cart = cartRepository.save(cart);
-        return mapToResponse(cart);
+        cartRepository.save(cart);
+        return mapToResponse(loadCartWithItems(cart.getId()));
     }
 
     public CartResponse clearCart(Long userId, String cartIdentifier) {
@@ -157,13 +165,13 @@ public class CartService {
         cart.getItems().clear();
 
         updateCartTotals(cart);
-        cart = cartRepository.save(cart);
-        return mapToResponse(cart);
+        cartRepository.save(cart);
+        return mapToResponse(loadCartWithItems(cart.getId()));
     }
 
     public CartResponse getCart(Long userId, String cartIdentifier) {
         Cart cart = getCartEntity(userId, cartIdentifier);
-        return mapToResponse(cart);
+        return mapToResponse(loadCartWithItems(cart.getId()));
     }
 
     private Cart getCartEntity(Long userId, String cartIdentifier) {
@@ -179,6 +187,13 @@ public class CartService {
             throw new RuntimeException("Either userId or cartIdentifier must be provided");
         }
 
+        return cart;
+    }
+
+    private Cart loadCartWithItems(Long cartId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        cart.getItems().size();
         return cart;
     }
 

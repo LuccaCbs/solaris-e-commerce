@@ -1,11 +1,7 @@
-import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { FeaturedProduct } from '../../api/featuredProductService'
-import { cartService } from '../../api/cartService'
 import ProductImageSlider from '../ProductImageSlider'
-import { getStoredUser } from '../../utils/auth'
+import { useAddToCart } from '../../hooks/useAddToCart'
 import { ShoppingCart } from 'lucide-react'
-import toast from 'react-hot-toast'
 
 type MenuProductCardProps = {
   item: FeaturedProduct
@@ -14,38 +10,7 @@ type MenuProductCardProps = {
 }
 
 const MenuProductCard = ({ item, onSelect, large = false }: MenuProductCardProps) => {
-  const [isAdding, setIsAdding] = useState(false)
-  const queryClient = useQueryClient()
-  const user = getStoredUser()
-
-  const addToCartMutation = useMutation({
-    mutationFn: () => {
-      const cartIdentifier = localStorage.getItem('cartIdentifier')
-      return cartService.addItemToCart(user?.id, cartIdentifier || undefined, item.productId, 1)
-    },
-    onSuccess: (data) => {
-      if (data.cartIdentifier) {
-        localStorage.setItem('cartIdentifier', data.cartIdentifier)
-      }
-      queryClient.invalidateQueries({ queryKey: ['cart'] })
-      toast.success('Producto agregado al carrito')
-      setIsAdding(false)
-    },
-    onError: () => {
-      toast.error('Error al agregar al carrito')
-      setIsAdding(false)
-    },
-  })
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (item.stockQuantity <= 0) {
-      toast.error('Producto sin stock')
-      return
-    }
-    setIsAdding(true)
-    addToCartMutation.mutate()
-  }
+  const { addToCart, isAdding } = useAddToCart(item)
 
   return (
     <article
@@ -81,7 +46,7 @@ const MenuProductCard = ({ item, onSelect, large = false }: MenuProductCardProps
             $ {item.price.toLocaleString('es-AR')}
           </p>
           <button
-            onClick={handleAddToCart}
+            onClick={addToCart}
             disabled={isAdding || item.stockQuantity <= 0}
             className={`mt-2 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${large ? 'text-sm font-medium' : 'text-xs font-medium'}`}
           >

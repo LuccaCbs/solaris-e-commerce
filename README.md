@@ -47,13 +47,23 @@ GRANT ALL PRIVILEGES ON DATABASE solaris_ecommerce TO postgres;
 
 ### 3. Configurar Backend (solaris-ecommerce-api)
 
-Editar `src/main/resources/application.yml`:
+**No edites la contraseña directamente en `application.yml`** ni en archivos dentro de `target/` (Maven los regenera en cada `mvn spring-boot:run`).
+
+Para desarrollo local, crea `src/main/resources/application-local.yml` a partir del ejemplo:
+
+```bash
+cd solaris-ecommerce-api/src/main/resources
+copy application-local.yml.example application-local.yml
+```
+
+Luego edita `application-local.yml` con tu contraseña de PostgreSQL:
+
 ```yaml
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/solaris_ecommerce
     username: postgres
-    password: postgres
+    password: tu-password-de-postgres
 ```
 
 Ejecutar el backend:

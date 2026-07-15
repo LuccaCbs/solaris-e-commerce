@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { cartService } from '../../api/cartService'
+import { getStoredUser } from '../../utils/auth'
 import { Plus, Minus, Trash2, ShoppingBag } from 'lucide-react'
 import toast from 'react-hot-toast'
 import LanguageSelector from '../../components/LanguageSelector'
@@ -10,8 +11,8 @@ const CartPage = () => {
   const { t } = useTranslation()
   const [cartIdentifier, setCartIdentifier] = useState<string | null>(null)
   const queryClient = useQueryClient()
+  const user = getStoredUser()
 
-  // Obtener cartIdentifier de localStorage
   useEffect(() => {
     const savedCartId = localStorage.getItem('cartIdentifier')
     if (savedCartId) {
@@ -20,14 +21,21 @@ const CartPage = () => {
   }, [])
 
   const { data: cart, isLoading } = useQuery({
-    queryKey: ['cart', cartIdentifier],
-    queryFn: () => cartService.getCart(undefined, cartIdentifier || undefined),
-    enabled: !!cartIdentifier,
+    queryKey: ['cart', cartIdentifier, user?.id],
+    queryFn: () => cartService.getCart(user?.id, cartIdentifier || undefined),
+    enabled: Boolean(cartIdentifier || user?.id),
   })
+
+  useEffect(() => {
+    if (cart?.cartIdentifier && cart.cartIdentifier !== cartIdentifier) {
+      localStorage.setItem('cartIdentifier', cart.cartIdentifier)
+      setCartIdentifier(cart.cartIdentifier)
+    }
+  }, [cart?.cartIdentifier, cartIdentifier])
 
   const updateItemMutation = useMutation({
     mutationFn: ({ itemId, quantity }: { itemId: number; quantity: number }) =>
-      cartService.updateCartItem(undefined, cartIdentifier || undefined, itemId, quantity),
+      cartService.updateCartItem(user?.id, cartIdentifier || undefined, itemId, quantity),
     onSuccess: (data) => {
       queryClient.setQueryData(['cart', cartIdentifier], data)
       toast.success(t('cart.update'))
@@ -39,7 +47,7 @@ const CartPage = () => {
 
   const removeItemMutation = useMutation({
     mutationFn: (itemId: number) =>
-      cartService.removeCartItem(undefined, cartIdentifier || undefined, itemId),
+      cartService.removeCartItem(user?.id, cartIdentifier || undefined, itemId),
     onSuccess: (data) => {
       queryClient.setQueryData(['cart', cartIdentifier], data)
       toast.success(t('cart.remove'))
@@ -50,7 +58,7 @@ const CartPage = () => {
   })
 
   const clearCartMutation = useMutation({
-    mutationFn: () => cartService.clearCart(undefined, cartIdentifier || undefined),
+    mutationFn: () => cartService.clearCart(user?.id, cartIdentifier || undefined),
     onSuccess: (data) => {
       queryClient.setQueryData(['cart', cartIdentifier], data)
       toast.success('Carrito vaciado')
