@@ -55,10 +55,20 @@ public class StoreConfigService {
     }
 
     public StoreConfigResponse updateConfig(String key, StoreConfigRequest request) {
-        StoreConfig config = storeConfigRepository.findByConfigKey(key)
-                .orElseThrow(() -> new RuntimeException("Config not found"));
+        StoreConfig config = storeConfigRepository.findByConfigKey(key).orElse(null);
 
-        config.setConfigValue(request.getConfigValue());
+        if (config == null) {
+            StoreConfig newConfig = StoreConfig.builder()
+                    .configKey(key)
+                    .configValue(request.getConfigValue() != null ? request.getConfigValue() : "")
+                    .description(request.getDescription())
+                    .category(request.getCategory())
+                    .active(request.getActive() != null ? request.getActive() : true)
+                    .build();
+            return mapToResponse(storeConfigRepository.save(newConfig));
+        }
+
+        config.setConfigValue(request.getConfigValue() != null ? request.getConfigValue() : "");
         if (request.getDescription() != null) {
             config.setDescription(request.getDescription());
         }

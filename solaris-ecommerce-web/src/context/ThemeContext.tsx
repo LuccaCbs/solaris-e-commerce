@@ -4,16 +4,34 @@ import { storeConfigService } from '../api/storeConfigService'
 
 export type ThemePreset = {
   id: string
+  name?: string
   primaryColor: string
   secondaryColor: string
   accentColor: string
 }
 
 export const THEME_PRESETS: ThemePreset[] = [
-  { id: 'LIGHT_YELLOW', primaryColor: '#facc15', secondaryColor: '#111827', accentColor: '#ffffff' },
-  { id: 'BEIGE_PURPLE', primaryColor: '#e8d9c5', secondaryColor: '#5b3a70', accentColor: '#faf6f0' },
-  { id: 'WHITE_BLUE', primaryColor: '#dbeafe', secondaryColor: '#1e3a8a', accentColor: '#ffffff' },
-  { id: 'SAGE_TERRACOTTA', primaryColor: '#c9d6bb', secondaryColor: '#a15c43', accentColor: '#f7f5ef' },
+  { id: 'LIGHT_YELLOW', name: 'LIGHT_YELLOW', primaryColor: '#facc15', secondaryColor: '#111827', accentColor: '#ffffff' },
+  { id: 'BEIGE_PURPLE', name: 'BEIGE_PURPLE', primaryColor: '#e8d9c5', secondaryColor: '#5b3a70', accentColor: '#faf6f0' },
+  { id: 'WHITE_BLUE', name: 'WHITE_BLUE', primaryColor: '#dbeafe', secondaryColor: '#1e3a8a', accentColor: '#ffffff' },
+  { id: 'SAGE_TERRACOTTA', name: 'SAGE_TERRACOTTA', primaryColor: '#c9d6bb', secondaryColor: '#a15c43', accentColor: '#f7f5ef' },
+]
+
+export const parseCustomThemes = (json: string | undefined): ThemePreset[] => {
+  try {
+    const parsed = JSON.parse(json || '[]')
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (t) => t?.id && t?.primaryColor && t?.secondaryColor && t?.accentColor
+    )
+  } catch {
+    return []
+  }
+}
+
+export const getAllThemes = (customThemesJson?: string): ThemePreset[] => [
+  ...THEME_PRESETS,
+  ...parseCustomThemes(customThemesJson),
 ]
 
 type AppearanceConfig = {

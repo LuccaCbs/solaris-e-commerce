@@ -329,7 +329,18 @@
       "save": "Guardar cambios",
       "reset": "Restablecer",
       "updated": "Apariencia actualizada exitosamente",
-      "error": "Error al actualizar la apariencia"
+      "error": "Error al actualizar la apariencia",
+      "errorFields": "No se pudieron guardar: {{fields}}",
+      "errorUnknown": "Error desconocido",
+      "customThemes": "Temas personalizados",
+      "addTheme": "Crear nuevo tema",
+      "addThemeButton": "Agregar",
+      "addThemeHint": "Usa los colores actuales para crear un tema nuevo.",
+      "themeNamePlaceholder": "Ej: Verde oscuro",
+      "themeNameRequired": "Ingresa un nombre para el tema",
+      "themeAdded": "Tema agregado. Recuerda guardar los cambios.",
+      "deleteTheme": "Eliminar tema",
+      "colorPreview": "Vista previa de colores"
     },
     "shop": {
       "title": "Tienda"

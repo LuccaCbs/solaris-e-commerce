@@ -8,7 +8,6 @@ public class StoreConfigRequest {
     @NotBlank(message = "Config key is required")
     private String configKey;
 
-    @NotBlank(message = "Config value is required")
     private String configValue;
 
     private String description;

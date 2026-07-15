@@ -272,7 +272,18 @@
       "save": "Desar canvis",
       "reset": "Restablir",
       "updated": "Apariència actualitzada exitosament",
-      "error": "Error al actualitzar l'apariència"
+      "error": "Error al actualitzar l'apariència",
+      "errorFields": "No s'han pogut desar: {{fields}}",
+      "errorUnknown": "Error desconegut",
+      "customThemes": "Temes personalitzats",
+      "addTheme": "Crear nou tema",
+      "addThemeButton": "Afegir",
+      "addThemeHint": "Utilitza els colors actuals per crear un tema nou.",
+      "themeNamePlaceholder": "Ex: Verd fosc",
+      "themeNameRequired": "Introdueix un nom per al tema",
+      "themeAdded": "Tema afegit. Recorda desar els canvis.",
+      "deleteTheme": "Eliminar tema",
+      "colorPreview": "Vista prèvia de colors"
     },
     "shop": {
       "title": "Botiga"

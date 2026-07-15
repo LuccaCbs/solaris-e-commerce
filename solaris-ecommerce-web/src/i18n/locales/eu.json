@@ -272,7 +272,18 @@
       "save": "Gorde aldaketak",
       "reset": "Berrezarri",
       "updated": "Itzura ondo eguneratua",
-      "error": "Errorea itzura eguneratzean"
+      "error": "Errorea itzura eguneratzean",
+      "errorFields": "Ezin izan dira gorde: {{fields}}",
+      "errorUnknown": "Errore ezezaguna",
+      "customThemes": "Gai pertsonalizatuak",
+      "addTheme": "Gai berria sortu",
+      "addThemeButton": "Gehitu",
+      "addThemeHint": "Uneko koloreak erabiliz gai berria sortzen du.",
+      "themeNamePlaceholder": "Adib: Berde iluna",
+      "themeNameRequired": "Sartu gaiaren izena",
+      "themeAdded": "Gai gehituta. Gogoratu aldaketak gordetzea.",
+      "deleteTheme": "Gai ezabatu",
+      "colorPreview": "Kolore aurrebista"
     },
     "shop": {
       "title": "Denda"

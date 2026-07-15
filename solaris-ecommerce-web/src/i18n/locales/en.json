@@ -278,7 +278,18 @@
       "save": "Save Changes",
       "reset": "Reset",
       "updated": "Appearance updated successfully",
-      "error": "Error updating appearance"
+      "error": "Error updating appearance",
+      "errorFields": "Could not save: {{fields}}",
+      "errorUnknown": "Unknown error",
+      "customThemes": "Custom themes",
+      "addTheme": "Create new theme",
+      "addThemeButton": "Add",
+      "addThemeHint": "Uses current colors to create a new theme.",
+      "themeNamePlaceholder": "E.g. Dark green",
+      "themeNameRequired": "Enter a name for the theme",
+      "themeAdded": "Theme added. Remember to save changes.",
+      "deleteTheme": "Delete theme",
+      "colorPreview": "Color preview"
     },
     "shop": {
       "title": "Shop"
