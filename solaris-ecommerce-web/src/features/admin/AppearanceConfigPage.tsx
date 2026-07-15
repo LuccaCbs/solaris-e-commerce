@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Palette, Save, RefreshCw, Upload, X, Plus, Trash2 } from 'lucide-react'
+import { Palette, Save, RefreshCw, Upload, X, Plus, Trash2, MapPin, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { storeConfigService } from '../../api/storeConfigService'
 import { fileToBase64, toImageSrc } from '../../api/productImageService'
@@ -12,6 +12,9 @@ import {
 } from '../../context/ThemeContext'
 import LanguageSelector from '../../components/LanguageSelector'
 import { isAxiosError } from 'axios'
+import GoogleMapEmbed from '../../components/GoogleMapEmbed'
+import { hasMapLocation } from '../../utils/googleMaps'
+import { geocodeAddress } from '../../utils/geocode'
 
 type FormData = {
   theme: string
@@ -31,6 +34,11 @@ type FormData = {
   facebookUrl: string
   linkedinEnabled: boolean
   linkedinUrl: string
+  mapEnabled: boolean
+  mapAddress: string
+  mapLatitude: string
+  mapLongitude: string
+  mapZoom: string
 }
 
 const buildFormData = (configMap: Map<string, string>): FormData => ({
@@ -57,6 +65,11 @@ const buildFormData = (configMap: Map<string, string>): FormData => ({
   facebookUrl: configMap.get('appearance.facebook_url') || '',
   linkedinEnabled: configMap.get('appearance.linkedin_enabled') === 'true',
   linkedinUrl: configMap.get('appearance.linkedin_url') || '',
+  mapEnabled: configMap.get('appearance.map_enabled') === 'true',
+  mapAddress: configMap.get('appearance.map_address') || '',
+  mapLatitude: configMap.get('appearance.map_latitude') || '',
+  mapLongitude: configMap.get('appearance.map_longitude') || '',
+  mapZoom: configMap.get('appearance.map_zoom') || '15',
 })
 
 const CONFIG_FIELD_KEYS: Record<string, keyof FormData | 'customThemes'> = {
@@ -78,6 +91,11 @@ const CONFIG_FIELD_KEYS: Record<string, keyof FormData | 'customThemes'> = {
   'appearance.linkedin_enabled': 'linkedinEnabled',
   'appearance.linkedin_url': 'linkedinUrl',
   'appearance.custom_themes': 'customThemes',
+  'appearance.map_enabled': 'mapEnabled',
+  'appearance.map_address': 'mapAddress',
+  'appearance.map_latitude': 'mapLatitude',
+  'appearance.map_longitude': 'mapLongitude',
+  'appearance.map_zoom': 'mapZoom',
 }
 
 const AppearanceConfigPage = () => {
@@ -93,6 +111,7 @@ const AppearanceConfigPage = () => {
   const [newThemeName, setNewThemeName] = useState('')
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const [isSaving, setIsSaving] = useState(false)
+  const [isGeocoding, setIsGeocoding] = useState(false)
   const hasInitialized = useRef(false)
 
   useEffect(() => {
@@ -127,6 +146,11 @@ const AppearanceConfigPage = () => {
       linkedinEnabled: 'LinkedIn',
       linkedinUrl: 'LinkedIn URL',
       customThemes: t('admin.appearance.customThemes'),
+      mapEnabled: t('admin.appearance.mapEnabled'),
+      mapAddress: t('admin.appearance.mapAddress'),
+      mapLatitude: t('admin.appearance.mapLatitude'),
+      mapLongitude: t('admin.appearance.mapLongitude'),
+      mapZoom: t('admin.appearance.mapZoom'),
     }
     return field ? labels[field] || configKey : configKey
   }
@@ -204,6 +228,34 @@ const AppearanceConfigPage = () => {
     }
   }
 
+  const handleGeocodeAddress = async () => {
+    if (!formData.mapAddress.trim()) {
+      toast.error(t('admin.appearance.mapAddressRequired'))
+      return
+    }
+    setIsGeocoding(true)
+    try {
+      const result = await geocodeAddress(formData.mapAddress)
+      if (!result) {
+        toast.error(t('admin.appearance.mapGeocodeNotFound'))
+        return
+      }
+      setFormData({
+        ...formData,
+        mapLatitude: result.latitude,
+        mapLongitude: result.longitude,
+        mapEnabled: true,
+      })
+      toast.success(t('admin.appearance.mapGeocodeSuccess'))
+    } catch {
+      toast.error(t('admin.appearance.mapGeocodeError'))
+    } finally {
+      setIsGeocoding(false)
+    }
+  }
+
+  const showMapPreview = hasMapLocation(formData)
+
   const handleImageSelect = async (files: FileList | null) => {
     if (!files?.length) return
     setPendingFiles([...pendingFiles, ...Array.from(files)])
@@ -250,6 +302,11 @@ const AppearanceConfigPage = () => {
         { key: 'appearance.facebook_url', value: formData.facebookUrl },
         { key: 'appearance.linkedin_enabled', value: String(formData.linkedinEnabled) },
         { key: 'appearance.linkedin_url', value: formData.linkedinUrl },
+        { key: 'appearance.map_enabled', value: String(formData.mapEnabled) },
+        { key: 'appearance.map_address', value: formData.mapAddress },
+        { key: 'appearance.map_latitude', value: formData.mapLatitude },
+        { key: 'appearance.map_longitude', value: formData.mapLongitude },
+        { key: 'appearance.map_zoom', value: formData.mapZoom },
         { key: 'appearance.custom_themes', value: JSON.stringify(updatedCustomThemes) },
       ]
 
@@ -625,27 +682,128 @@ const AppearanceConfigPage = () => {
                   rows={3}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.appearance.contactPhone')}
-                </label>
-                <input
-                  type="text"
-                  value={formData.contactPhone}
-                  onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
+
+              <div className="border-t pt-4 mt-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <MapPin className="w-5 h-5 text-gray-500" />
+                  <h3 className="text-sm font-medium text-gray-900">{t('admin.appearance.mapLocation')}</h3>
+                </div>
+                <div className="space-y-4">
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={formData.mapEnabled}
+                      onChange={(e) => setFormData({ ...formData, mapEnabled: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    {t('admin.appearance.mapEnabled')}
+                  </label>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('admin.appearance.mapAddress')}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={formData.mapAddress}
+                        onChange={(e) => setFormData({ ...formData, mapAddress: e.target.value })}
+                        placeholder={t('admin.appearance.mapAddressPlaceholder')}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleGeocodeAddress}
+                        disabled={isGeocoding}
+                        className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center gap-1 text-sm disabled:opacity-50"
+                      >
+                        <Search className="w-4 h-4" />
+                        {isGeocoding ? t('common.loading') : t('admin.appearance.mapSearch')}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">{t('admin.appearance.mapAddressHint')}</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('admin.appearance.mapLatitude')}
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.mapLatitude}
+                        onChange={(e) => setFormData({ ...formData, mapLatitude: e.target.value })}
+                        placeholder="40.416775"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('admin.appearance.mapLongitude')}
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.mapLongitude}
+                        onChange={(e) => setFormData({ ...formData, mapLongitude: e.target.value })}
+                        placeholder="-3.703790"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('admin.appearance.mapZoom')}
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={21}
+                        value={formData.mapZoom}
+                        onChange={(e) => setFormData({ ...formData, mapZoom: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                  </div>
+                  {showMapPreview && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 mb-2">{t('admin.appearance.mapPreview')}</p>
+                      <div className="w-full h-56 rounded-lg overflow-hidden border border-gray-200">
+                        <GoogleMapEmbed
+                          latitude={formData.mapLatitude}
+                          longitude={formData.mapLongitude}
+                          address={formData.mapAddress}
+                          zoom={formData.mapZoom}
+                          title={t('admin.appearance.mapPreview')}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.appearance.contactEmail')}
-                </label>
-                <input
-                  type="email"
-                  value={formData.contactEmail}
-                  onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
+
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">{t('admin.appearance.contactInfo')}</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('admin.appearance.contactPhone')}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.contactPhone}
+                      onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('admin.appearance.contactEmail')}
+                    </label>
+                    <input
+                      type="email"
+                      value={formData.contactEmail}
+                      onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+                </div>
               </div>
               <div className="border-t pt-4 mt-4">
                 <h3 className="text-sm font-medium text-gray-900 mb-3">{t('admin.appearance.socialMedia')}</h3>

@@ -340,7 +340,22 @@
       "themeNameRequired": "Ingresa un nombre para el tema",
       "themeAdded": "Tema agregado. Recuerda guardar los cambios.",
       "deleteTheme": "Eliminar tema",
-      "colorPreview": "Vista previa de colores"
+      "colorPreview": "Vista previa de colores",
+      "mapLocation": "Ubicación en el mapa",
+      "mapEnabled": "Mostrar mapa en Sobre Nosotros",
+      "mapAddress": "Dirección",
+      "mapAddressPlaceholder": "Ej: Calle Mayor 1, Madrid",
+      "mapAddressHint": "Busca la dirección o ingresa latitud y longitud manualmente.",
+      "mapSearch": "Buscar",
+      "mapLatitude": "Latitud",
+      "mapLongitude": "Longitud",
+      "mapZoom": "Zoom",
+      "mapPreview": "Vista previa del mapa",
+      "mapAddressRequired": "Ingresa una dirección para buscar",
+      "mapGeocodeSuccess": "Ubicación encontrada",
+      "mapGeocodeNotFound": "No se encontró la dirección",
+      "mapGeocodeError": "Error al buscar la ubicación",
+      "contactInfo": "Información de contacto"
     },
     "shop": {
       "title": "Tienda"

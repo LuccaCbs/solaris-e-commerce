@@ -283,7 +283,22 @@
       "themeNameRequired": "Introdueix un nom per al tema",
       "themeAdded": "Tema afegit. Recorda desar els canvis.",
       "deleteTheme": "Eliminar tema",
-      "colorPreview": "Vista prèvia de colors"
+      "colorPreview": "Vista prèvia de colors",
+      "mapLocation": "Ubicació al mapa",
+      "mapEnabled": "Mostrar mapa a Sobre Nosaltres",
+      "mapAddress": "Adreça",
+      "mapAddressPlaceholder": "Ex: Carrer Major 1, Madrid",
+      "mapAddressHint": "Cerca l'adreça o introdueix latitud i longitud manualment.",
+      "mapSearch": "Cercar",
+      "mapLatitude": "Latitud",
+      "mapLongitude": "Longitud",
+      "mapZoom": "Zoom",
+      "mapPreview": "Vista prèvia del mapa",
+      "mapAddressRequired": "Introdueix una adreça per cercar",
+      "mapGeocodeSuccess": "Ubicació trobada",
+      "mapGeocodeNotFound": "No s'ha trobat l'adreça",
+      "mapGeocodeError": "Error en cercar la ubicació",
+      "contactInfo": "Informació de contacte"
     },
     "shop": {
       "title": "Botiga"

@@ -289,7 +289,22 @@
       "themeNameRequired": "Enter a name for the theme",
       "themeAdded": "Theme added. Remember to save changes.",
       "deleteTheme": "Delete theme",
-      "colorPreview": "Color preview"
+      "colorPreview": "Color preview",
+      "mapLocation": "Map location",
+      "mapEnabled": "Show map in About Us",
+      "mapAddress": "Address",
+      "mapAddressPlaceholder": "E.g. 123 Main St, Madrid",
+      "mapAddressHint": "Search by address or enter latitude and longitude manually.",
+      "mapSearch": "Search",
+      "mapLatitude": "Latitude",
+      "mapLongitude": "Longitude",
+      "mapZoom": "Zoom",
+      "mapPreview": "Map preview",
+      "mapAddressRequired": "Enter an address to search",
+      "mapGeocodeSuccess": "Location found",
+      "mapGeocodeNotFound": "Address not found",
+      "mapGeocodeError": "Error searching location",
+      "contactInfo": "Contact information"
     },
     "shop": {
       "title": "Shop"

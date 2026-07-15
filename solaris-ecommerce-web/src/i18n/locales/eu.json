@@ -283,7 +283,22 @@
       "themeNameRequired": "Sartu gaiaren izena",
       "themeAdded": "Gai gehituta. Gogoratu aldaketak gordetzea.",
       "deleteTheme": "Gai ezabatu",
-      "colorPreview": "Kolore aurrebista"
+      "colorPreview": "Kolore aurrebista",
+      "mapLocation": "Mapako kokapena",
+      "mapEnabled": "Erakutsi mapa Guri Buruz atalean",
+      "mapAddress": "Helbidea",
+      "mapAddressPlaceholder": "Adib: Kale Nagusia 1, Madril",
+      "mapAddressHint": "Bilatu helbidea edo sartu latitudea eta longitudea eskuz.",
+      "mapSearch": "Bilatu",
+      "mapLatitude": "Latitudea",
+      "mapLongitude": "Longitudea",
+      "mapZoom": "Zoom",
+      "mapPreview": "Maparen aurrebista",
+      "mapAddressRequired": "Sartu helbide bat bilatzeko",
+      "mapGeocodeSuccess": "Kokapena aurkitua",
+      "mapGeocodeNotFound": "Helbidea ez da aurkitu",
+      "mapGeocodeError": "Errorea kokapena bilatzean",
+      "contactInfo": "Kontaktu informazioa"
     },
     "shop": {
       "title": "Denda"

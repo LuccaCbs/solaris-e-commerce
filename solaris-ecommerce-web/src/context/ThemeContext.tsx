@@ -52,6 +52,11 @@ type AppearanceConfig = {
   facebookUrl: string
   linkedinEnabled: boolean
   linkedinUrl: string
+  mapEnabled: boolean
+  mapAddress: string
+  mapLatitude: string
+  mapLongitude: string
+  mapZoom: string
 }
 
 const defaultAppearance: AppearanceConfig = {
@@ -72,6 +77,11 @@ const defaultAppearance: AppearanceConfig = {
   facebookUrl: '',
   linkedinEnabled: false,
   linkedinUrl: '',
+  mapEnabled: false,
+  mapAddress: '',
+  mapLatitude: '',
+  mapLongitude: '',
+  mapZoom: '15',
 }
 
 const ThemeContext = createContext<AppearanceConfig>(defaultAppearance)
@@ -105,6 +115,11 @@ const parseConfigList = (configs: any[] | undefined): AppearanceConfig => {
     facebookUrl: map.get('appearance.facebook_url') || '',
     linkedinEnabled: map.get('appearance.linkedin_enabled') === 'true',
     linkedinUrl: map.get('appearance.linkedin_url') || '',
+    mapEnabled: map.get('appearance.map_enabled') === 'true',
+    mapAddress: map.get('appearance.map_address') || '',
+    mapLatitude: map.get('appearance.map_latitude') || '',
+    mapLongitude: map.get('appearance.map_longitude') || '',
+    mapZoom: map.get('appearance.map_zoom') || '15',
   }
 }
 
