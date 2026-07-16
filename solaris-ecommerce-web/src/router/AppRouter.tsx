@@ -16,6 +16,7 @@ import FeaturedCategoriesPage from '../features/admin/FeaturedCategoriesPage'
 import AppearanceConfigPage from '../features/admin/AppearanceConfigPage'
 import MenuConfigPage from '../features/admin/MenuConfigPage'
 import FormConfigPage from '../features/admin/FormConfigPage'
+import OrdersManagementPage from '../features/admin/OrdersManagementPage'
 import ProfilePage from '../features/profile/ProfilePage'
 import AdminLayout from '../components/AdminLayout'
 import ProtectedRoute from '../components/ProtectedRoute'
@@ -45,6 +46,7 @@ const AppRouter = () => {
         <Route path="categories" element={<CategoryManagementPage />} />
         <Route path="menu-config" element={<MenuConfigPage />} />
         <Route path="form-config" element={<FormConfigPage />} />
+        <Route path="orders" element={<OrdersManagementPage />} />
         <Route path="featured" element={<FeaturedProductsPage />} />
         <Route path="featured-categories" element={<FeaturedCategoriesPage />} />
         <Route path="customers" element={<CustomerManagementPage />} />

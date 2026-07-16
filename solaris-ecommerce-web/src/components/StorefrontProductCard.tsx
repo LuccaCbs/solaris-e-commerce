@@ -5,21 +5,20 @@ import MenuProductCard from './productCards/MenuProductCard'
 
 type StorefrontProductCardProps = {
   item: FeaturedProduct
-  onSelect?: (item: FeaturedProduct) => void
   largeMenu?: boolean
 }
 
-const StorefrontProductCard = ({ item, onSelect, largeMenu = false }: StorefrontProductCardProps) => {
+const StorefrontProductCard = ({ item, largeMenu = false }: StorefrontProductCardProps) => {
   const cardType: CardType = item.cardType || 'BASIC'
 
   switch (cardType) {
     case 'COMPACT':
-      return <CompactProductCard item={item} onSelect={onSelect} />
+      return <CompactProductCard item={item} />
     case 'MENU':
-      return <MenuProductCard item={item} onSelect={onSelect} large={largeMenu} />
+      return <MenuProductCard item={item} large={largeMenu} />
     case 'BASIC':
     default:
-      return <BasicProductCard item={item} onSelect={onSelect} />
+      return <BasicProductCard item={item} />
   }
 }
 

@@ -1,4 +1,5 @@
 import apiClient from './axiosClient'
+import { CheckoutResponse } from '../types/order'
 
 export type CartItemDetail = {
   id?: number
@@ -99,6 +100,16 @@ export const cartService = {
     const params = cartIdentifier ? { cartIdentifier } : {}
     
     const response = await apiClient.delete('/cart/clear', { headers, params })
+    return response.data
+  },
+
+  checkout: async (userId?: number, cartIdentifier?: string): Promise<CheckoutResponse> => {
+    const headers: Record<string, string> = {}
+    if (userId) headers['X-User-Id'] = userId.toString()
+
+    const params = cartIdentifier ? { cartIdentifier } : {}
+
+    const response = await apiClient.post('/cart/checkout', null, { headers, params })
     return response.data
   },
 }

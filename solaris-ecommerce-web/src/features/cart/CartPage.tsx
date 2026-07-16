@@ -68,6 +68,18 @@ const CartPage = () => {
     },
   })
 
+  const checkoutMutation = useMutation({
+    mutationFn: () => cartService.checkout(user?.id, cartIdentifier || undefined),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] })
+      toast.success(t('cart.checkoutSuccess', { orderNumber: data.orderNumber }))
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || t('cart.checkoutError')
+      toast.error(message)
+    },
+  })
+
   const handleQuantityChange = (itemId: number, currentQuantity: number, change: number) => {
     const newQuantity = currentQuantity + change
     if (newQuantity > 0) {
@@ -231,8 +243,12 @@ const CartPage = () => {
                 </div>
               </div>
 
-              <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium">
-                {t('cart.checkout')}
+              <button
+                onClick={() => checkoutMutation.mutate()}
+                disabled={checkoutMutation.isPending}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50"
+              >
+                {checkoutMutation.isPending ? t('common.loading') : t('cart.checkout')}
               </button>
 
               <button

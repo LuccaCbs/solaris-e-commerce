@@ -63,6 +63,10 @@ public class Order {
     @Column(length = 1000)
     private String notes;
 
+    @Column(name = "viewed_by_admin", nullable = false)
+    @Builder.Default
+    private Boolean viewedByAdmin = false;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 

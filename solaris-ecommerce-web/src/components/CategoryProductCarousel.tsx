@@ -7,12 +7,11 @@ import { getCarouselWindow } from '../utils/featuredProductLayout'
 type CategoryProductCarouselProps = {
   categoryName: string
   products: FeaturedProduct[]
-  onSelect?: (item: FeaturedProduct) => void
 }
 
 const VISIBLE_COUNT = 3
 
-const CategoryProductCarousel = ({ categoryName, products, onSelect }: CategoryProductCarouselProps) => {
+const CategoryProductCarousel = ({ categoryName, products }: CategoryProductCarouselProps) => {
   const [startIndex, setStartIndex] = useState(0)
   const hasCarousel = products.length > VISIBLE_COUNT
   const visibleProducts = getCarouselWindow(products, startIndex, VISIBLE_COUNT)
@@ -49,7 +48,6 @@ const CategoryProductCarousel = ({ categoryName, products, onSelect }: CategoryP
             <div key={`${item.id}-${startIndex}-${index}`} className="min-w-0 h-full">
               <StorefrontProductCard
                 item={item}
-                onSelect={onSelect}
                 largeMenu={item.cardType === 'MENU'}
               />
             </div>

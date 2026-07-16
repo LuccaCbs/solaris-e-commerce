@@ -1,26 +1,16 @@
+import { Link } from 'react-router-dom'
 import { FeaturedProduct } from '../../api/featuredProductService'
 import ProductImageSlider from '../ProductImageSlider'
 
 type ProductSliderCardProps = {
   item: FeaturedProduct
-  onSelect?: (item: FeaturedProduct) => void
 }
 
-const ProductSliderCard = ({ item, onSelect }: ProductSliderCardProps) => {
+const ProductSliderCard = ({ item }: ProductSliderCardProps) => {
   return (
-    <article
-      role={onSelect ? 'button' : undefined}
-      tabIndex={onSelect ? 0 : undefined}
-      onClick={() => onSelect?.(item)}
-      onKeyDown={(e) => {
-        if (onSelect && (e.key === 'Enter' || e.key === ' ')) {
-          e.preventDefault()
-          onSelect(item)
-        }
-      }}
-      className={`bg-white rounded-md shadow-sm hover:shadow-md transition h-full flex flex-col overflow-hidden border border-gray-100 ${
-        onSelect ? 'cursor-pointer' : ''
-      }`}
+    <Link
+      to={`/products/${item.productId}`}
+      className="bg-white rounded-md shadow-sm hover:shadow-md transition h-full flex flex-col overflow-hidden border border-gray-100 cursor-pointer"
     >
       <ProductImageSlider
         images={item.images}
@@ -32,7 +22,7 @@ const ProductSliderCard = ({ item, onSelect }: ProductSliderCardProps) => {
           {item.productName}
         </h3>
       </div>
-    </article>
+    </Link>
   )
 }
 

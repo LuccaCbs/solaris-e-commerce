@@ -19,6 +19,8 @@ public class OrderResponse {
     private Long customerId;
     private String customerName;
     private Long userId;
+    private String userName;
+    private String userEmail;
     private String status;
     private BigDecimal totalAmount;
     private BigDecimal subtotal;
@@ -31,5 +33,6 @@ public class OrderResponse {
     private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean viewedByAdmin;
     private List<OrderItemResponse> items;
 }

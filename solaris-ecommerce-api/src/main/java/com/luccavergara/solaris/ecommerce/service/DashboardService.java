@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -75,6 +76,31 @@ public class DashboardService {
         long dailyOrders = orderRepository.countByCreatedAtBetween(dayStart, dayEnd);
         stats.put("dailyOrders", dailyOrders);
 
+        long unopenedOrders = orderRepository.countByViewedByAdminFalse();
+        stats.put("unopenedOrders", unopenedOrders);
+
+        List<Map<String, Object>> recentUnopenedOrders = orderRepository
+                .findTop5ByViewedByAdminFalseOrderByCreatedAtDesc()
+                .stream()
+                .map(this::mapOrderSummary)
+                .toList();
+
+        stats.put("recentUnopenedOrders", recentUnopenedOrders);
+
         return stats;
+    }
+
+    private Map<String, Object> mapOrderSummary(Order order) {
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("id", order.getId());
+        summary.put("orderNumber", order.getOrderNumber());
+        summary.put("totalAmount", order.getTotalAmount());
+        summary.put("createdAt", order.getCreatedAt());
+        summary.put("viewedByAdmin", order.getViewedByAdmin());
+        if (order.getUser() != null) {
+            summary.put("userName", order.getUser().getFirstname() + " " + order.getUser().getLastname());
+            summary.put("userEmail", order.getUser().getEmail());
+        }
+        return summary;
     }
 }

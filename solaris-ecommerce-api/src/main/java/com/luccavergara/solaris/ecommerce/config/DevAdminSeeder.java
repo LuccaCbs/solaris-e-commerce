@@ -28,6 +28,7 @@ public class DevAdminSeeder implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         User admin = userRepository.findByEmail("admin@local.dev")
                 .orElseGet(this::createAdmin);
+        userRepository.findByEmail("guest@local.dev").orElseGet(this::createGuest);
         seedGeneralCategory(admin);
     }
 
@@ -44,6 +45,21 @@ public class DevAdminSeeder implements ApplicationRunner {
                 .build());
         log.info("Usuario admin de desarrollo creado: admin@local.dev / admin123");
         return admin;
+    }
+
+    private User createGuest() {
+        User guest = userRepository.save(User.builder()
+                .firstname("Invitado")
+                .lastname("Tienda")
+                .email("guest@local.dev")
+                .password(passwordEncoder.encode("guest"))
+                .authProvider(AuthProvider.LOCAL)
+                .role(Role.CUSTOMER)
+                .emailVerified(true)
+                .platformOperator(false)
+                .build());
+        log.info("Usuario invitado de desarrollo creado: guest@local.dev");
+        return guest;
     }
 
     private void seedGeneralCategory(User admin) {

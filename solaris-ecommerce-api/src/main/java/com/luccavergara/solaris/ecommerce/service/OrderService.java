@@ -159,12 +159,14 @@ public class OrderService {
     public OrderResponse getOrderById(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+        initializeOrderDetails(order);
         return mapToResponse(order);
     }
 
     public OrderResponse getOrderByNumber(String orderNumber) {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+        initializeOrderDetails(order);
         return mapToResponse(order);
     }
 
@@ -202,7 +204,41 @@ public class OrderService {
     }
 
     public Page<OrderResponse> getAllOrders(Pageable pageable) {
-        return orderRepository.findAll(pageable).map(this::mapToResponse);
+        return orderRepository.findAll(pageable).map(order -> {
+            initializeOrderDetails(order);
+            return mapToResponse(order);
+        });
+    }
+
+    public UnopenedOrdersSummary getUnopenedOrdersSummary() {
+        long count = orderRepository.countByViewedByAdminFalse();
+        UnopenedOrdersSummary.UnopenedOrdersSummaryBuilder builder = UnopenedOrdersSummary.builder()
+                .count(count);
+
+        orderRepository.findFirstByViewedByAdminFalseOrderByCreatedAtDesc()
+                .ifPresent(order -> builder.latestOrder(UnopenedOrdersSummary.OrderSummary.builder()
+                        .id(order.getId())
+                        .orderNumber(order.getOrderNumber())
+                        .totalAmount(order.getTotalAmount())
+                        .createdAt(order.getCreatedAt())
+                        .build()));
+
+        return builder.build();
+    }
+
+    @Transactional
+    public OrderResponse markOrderAsViewed(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!Boolean.TRUE.equals(order.getViewedByAdmin())) {
+            order.setViewedByAdmin(true);
+            order.setUpdatedAt(LocalDateTime.now());
+            order = orderRepository.save(order);
+        }
+
+        initializeOrderDetails(order);
+        return mapToResponse(order);
     }
 
     @Transactional
@@ -214,7 +250,27 @@ public class OrderService {
         order.setUpdatedAt(LocalDateTime.now());
 
         order = orderRepository.save(order);
+        initializeOrderDetails(order);
         return mapToResponse(order);
+    }
+
+    private void initializeOrderDetails(Order order) {
+        if (order.getItems() != null) {
+            order.getItems().forEach(item -> {
+                if (item.getDetails() != null) {
+                    item.getDetails().size();
+                }
+            });
+        }
+    }
+
+    private String buildUserName(User user) {
+        if (user == null) {
+            return null;
+        }
+        String name = ((user.getFirstname() != null ? user.getFirstname() : "") + " "
+                + (user.getLastname() != null ? user.getLastname() : "")).trim();
+        return name.isEmpty() ? user.getEmail() : name;
     }
 
     private OrderResponse mapToResponse(Order order) {
@@ -228,6 +284,8 @@ public class OrderService {
                 .customerId(order.getCustomer() != null ? order.getCustomer().getId() : null)
                 .customerName(order.getCustomer() != null ? order.getCustomer().getRazonSocial() : null)
                 .userId(order.getUser() != null ? order.getUser().getId() : null)
+                .userName(buildUserName(order.getUser()))
+                .userEmail(order.getUser() != null ? order.getUser().getEmail() : null)
                 .status(order.getStatus().name())
                 .totalAmount(order.getTotalAmount())
                 .subtotal(order.getSubtotal())
@@ -240,6 +298,7 @@ public class OrderService {
                 .notes(order.getNotes())
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
+                .viewedByAdmin(order.getViewedByAdmin())
                 .items(items)
                 .build();
     }

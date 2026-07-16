@@ -11,8 +11,10 @@ import {
   Palette,
   Menu,
   FileText,
+  ClipboardList,
 } from 'lucide-react'
 import AppHeader from './AppHeader'
+import { useOrderNotifications } from '../hooks/useOrderNotifications'
 
 const adminNavItems = [
   { path: '/admin', labelKey: 'admin.dashboard.title', icon: LayoutDashboard, exact: true },
@@ -20,6 +22,7 @@ const adminNavItems = [
   { path: '/admin/categories', labelKey: 'nav.categories', icon: FolderTree },
   { path: '/admin/menu-config', labelKey: 'admin.menuConfig.title', icon: Menu },
   { path: '/admin/form-config', labelKey: 'admin.formConfig.title', icon: FileText },
+  { path: '/admin/orders', labelKey: 'admin.orders.title', icon: ClipboardList, showBadge: true },
   { path: '/admin/featured', labelKey: 'nav.featured', icon: Star },
   { path: '/admin/featured-categories', labelKey: 'admin.featuredCategories.title', icon: Tags },
   { path: '/admin/customers', labelKey: 'admin.customer.title', icon: Users },
@@ -30,6 +33,7 @@ const adminNavItems = [
 const AdminLayout = () => {
   const { t } = useTranslation()
   const location = useLocation()
+  const { unopenedCount } = useOrderNotifications()
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -37,20 +41,29 @@ const AdminLayout = () => {
       <div className="flex flex-1">
         <aside className="w-56 bg-white shadow-md flex-shrink-0 hidden lg:block">
           <nav className="p-4 space-y-1">
-            {adminNavItems.map(({ path, labelKey, icon: Icon, exact }) => {
+            {adminNavItems.map(({ path, labelKey, icon: Icon, exact, showBadge }) => {
               const isActive = exact
                 ? location.pathname === path
                 : location.pathname.startsWith(path)
+              const badgeCount = showBadge ? unopenedCount : 0
+
               return (
                 <Link
                   key={path}
                   to={path}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  className={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium transition ${
                     isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  {t(labelKey)}
+                  <span className="flex items-center gap-3">
+                    <Icon className="w-4 h-4" />
+                    {t(labelKey)}
+                  </span>
+                  {badgeCount > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-red-500 text-white text-xs font-bold">
+                      {badgeCount > 99 ? '99+' : badgeCount}
+                    </span>
+                  )}
                 </Link>
               )
             })}

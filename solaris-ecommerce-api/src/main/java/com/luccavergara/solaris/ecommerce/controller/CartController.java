@@ -1,7 +1,9 @@
 package com.luccavergara.solaris.ecommerce.controller;
 
+import com.luccavergara.solaris.ecommerce.dto.CheckoutResponse;
 import com.luccavergara.solaris.ecommerce.dto.CartItemRequest;
 import com.luccavergara.solaris.ecommerce.dto.CartResponse;
+import com.luccavergara.solaris.ecommerce.service.CartCheckoutService;
 import com.luccavergara.solaris.ecommerce.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
 
     private final CartService cartService;
+    private final CartCheckoutService cartCheckoutService;
 
     @GetMapping
     public ResponseEntity<CartResponse> getCart(
@@ -57,5 +60,13 @@ public class CartController {
             @RequestParam(value = "cartIdentifier", required = false) String cartIdentifier
     ) {
         return ResponseEntity.ok(cartService.clearCart(userId, cartIdentifier));
+    }
+
+    @PostMapping("/checkout")
+    public ResponseEntity<CheckoutResponse> checkout(
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            @RequestParam(value = "cartIdentifier", required = false) String cartIdentifier
+    ) {
+        return ResponseEntity.ok(cartCheckoutService.checkoutFromCart(userId, cartIdentifier));
     }
 }

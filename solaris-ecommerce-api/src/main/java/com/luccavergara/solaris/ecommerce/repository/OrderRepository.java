@@ -21,7 +21,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByStatus(OrderStatus status);
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
     long countByStatus(OrderStatus status);
+    long countByViewedByAdminFalse();
     long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    Optional<Order> findFirstByViewedByAdminFalseOrderByCreatedAtDesc();
+    List<Order> findTop5ByViewedByAdminFalseOrderByCreatedAtDesc();
     
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.createdAt BETWEEN :start AND :end")
     BigDecimal sumTotalAmountByCreatedAtBetween(LocalDateTime start, LocalDateTime end);

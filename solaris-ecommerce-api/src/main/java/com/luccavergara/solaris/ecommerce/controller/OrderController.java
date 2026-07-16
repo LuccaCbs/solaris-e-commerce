@@ -2,6 +2,7 @@ package com.luccavergara.solaris.ecommerce.controller;
 
 import com.luccavergara.solaris.ecommerce.dto.OrderRequest;
 import com.luccavergara.solaris.ecommerce.dto.OrderResponse;
+import com.luccavergara.solaris.ecommerce.dto.UnopenedOrdersSummary;
 import com.luccavergara.solaris.ecommerce.entity.OrderStatus;
 import com.luccavergara.solaris.ecommerce.service.OrderService;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +31,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
     public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getOrderById(id));
     }
@@ -39,6 +42,7 @@ public class OrderController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
     public ResponseEntity<Page<OrderResponse>> getAllOrders(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -48,6 +52,18 @@ public class OrderController {
         Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         return ResponseEntity.ok(orderService.getAllOrders(pageable));
+    }
+
+    @GetMapping("/unopened/summary")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
+    public ResponseEntity<UnopenedOrdersSummary> getUnopenedOrdersSummary() {
+        return ResponseEntity.ok(orderService.getUnopenedOrdersSummary());
+    }
+
+    @PatchMapping("/{id}/mark-viewed")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
+    public ResponseEntity<OrderResponse> markOrderAsViewed(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.markOrderAsViewed(id));
     }
 
     @GetMapping("/customer/{customerId}")
@@ -92,6 +108,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
     public ResponseEntity<OrderResponse> updateOrderStatus(
             @PathVariable Long id,
             @RequestParam OrderStatus status

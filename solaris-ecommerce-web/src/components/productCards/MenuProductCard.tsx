@@ -1,29 +1,21 @@
+import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { FeaturedProduct } from '../../api/featuredProductService'
 import ProductImageSlider from '../ProductImageSlider'
-import { useAddToCart } from '../../hooks/useAddToCart'
 import { ShoppingCart } from 'lucide-react'
 
 type MenuProductCardProps = {
   item: FeaturedProduct
-  onSelect?: (item: FeaturedProduct) => void
   large?: boolean
 }
 
-const MenuProductCard = ({ item, onSelect, large = false }: MenuProductCardProps) => {
-  const { addToCart, isAdding } = useAddToCart(item)
+const MenuProductCard = ({ item, large = false }: MenuProductCardProps) => {
+  const { t } = useTranslation()
 
   return (
-    <article
-      role={onSelect ? 'button' : undefined}
-      tabIndex={onSelect ? 0 : undefined}
-      onClick={() => onSelect?.(item)}
-      onKeyDown={(e) => {
-        if (onSelect && (e.key === 'Enter' || e.key === ' ')) {
-          e.preventDefault()
-          onSelect(item)
-        }
-      }}
-      className={`bg-white rounded-lg shadow-sm hover:shadow-md transition h-full flex border border-gray-100 overflow-hidden ${onSelect ? 'cursor-pointer' : ''}`}
+    <Link
+      to={`/products/${item.productId}`}
+      className="bg-white rounded-lg shadow-sm hover:shadow-md transition h-full flex border border-gray-100 overflow-hidden"
     >
       <ProductImageSlider
         images={item.images}
@@ -45,17 +37,15 @@ const MenuProductCard = ({ item, onSelect, large = false }: MenuProductCardProps
           <p className={`font-bold text-amber-700 mt-2 ${large ? 'text-xl md:text-2xl' : 'text-lg'}`}>
             $ {item.price.toLocaleString('es-AR')}
           </p>
-          <button
-            onClick={addToCart}
-            disabled={isAdding || item.stockQuantity <= 0}
-            className={`mt-2 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${large ? 'text-sm font-medium' : 'text-xs font-medium'}`}
+          <div
+            className={`mt-2 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition flex items-center justify-center gap-2 ${large ? 'text-sm font-medium' : 'text-xs font-medium'}`}
           >
             <ShoppingCart className={large ? 'w-4 h-4' : 'w-3 h-3'} />
-            {isAdding ? 'Agregando...' : 'Agregar al carrito'}
-          </button>
+            {t('catalog.addToCart')}
+          </div>
         </div>
       </div>
-    </article>
+    </Link>
   )
 }
 

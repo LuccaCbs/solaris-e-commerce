@@ -5,10 +5,9 @@ import StorefrontProductCard from './StorefrontProductCard'
 
 type FullWidthProductSliderProps = {
   products: FeaturedProduct[]
-  onSelect?: (item: FeaturedProduct) => void
 }
 
-const FullWidthProductSlider = ({ products, onSelect }: FullWidthProductSliderProps) => {
+const FullWidthProductSlider = ({ products }: FullWidthProductSliderProps) => {
   const [startIndex, setStartIndex] = useState(0)
   const VISIBLE_COUNT = 5
 
@@ -45,7 +44,7 @@ const FullWidthProductSlider = ({ products, onSelect }: FullWidthProductSliderPr
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
             {visibleProducts.map((item, index) => (
               <div key={`${item.id}-${startIndex}-${index}`} className="min-w-0">
-                <StorefrontProductCard item={item} onSelect={onSelect} />
+                <StorefrontProductCard item={item} />
               </div>
             ))}
           </div>
