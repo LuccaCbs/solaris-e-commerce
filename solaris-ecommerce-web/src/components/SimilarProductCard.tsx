@@ -14,9 +14,9 @@ const SimilarProductCard = ({ id, name, price, images }: SimilarProductCardProps
   return (
     <Link
       to={`/products/${id}`}
-      className="block bg-white rounded-lg border border-gray-100 overflow-hidden hover:shadow-md transition"
+      className="flex items-center gap-3 p-2 border border-gray-200 rounded-lg bg-white hover:shadow-sm transition flex-shrink-0 w-[220px]"
     >
-      <div className="aspect-square bg-gray-50">
+      <div className="w-16 h-16 flex-shrink-0 bg-gray-50 rounded overflow-hidden">
         {activeImage ? (
           <img
             src={toImageSrc(activeImage.imageData)}
@@ -24,12 +24,12 @@ const SimilarProductCard = ({ id, name, price, images }: SimilarProductCardProps
             className="w-full h-full object-contain"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-3xl text-gray-300">📦</div>
+          <div className="w-full h-full flex items-center justify-center text-lg text-gray-300">📦</div>
         )}
       </div>
-      <div className="p-3">
-        <p className="text-sm text-gray-800 line-clamp-2 leading-snug mb-1">{name}</p>
-        <p className="text-base font-semibold text-gray-900">
+      <div className="min-w-0 flex-1">
+        <p className="text-xs text-gray-800 line-clamp-2 leading-snug mb-1">{name}</p>
+        <p className="text-sm font-semibold text-gray-900">
           $ {price.toLocaleString('es-AR', { minimumFractionDigits: 0 })}
         </p>
       </div>

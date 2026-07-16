@@ -299,19 +299,19 @@
       "mapGeocodeNotFound": "Helbidea ez da aurkitu",
       "mapGeocodeError": "Errorea kokapena bilatzean",
       "contactInfo": "Kontaktu informazioa"
-    },
-    "shop": {
-      "title": "Denda"
-    },
-    "productDetail": {
-      "back": "Atzera",
-      "home": "Hasiera",
-      "buyNow": "Orain erosi",
-      "addToCart": "Saskira gehitu",
-      "adding": "Gehitzen...",
-      "quantity": "Kopurua",
-      "similarProducts": "Antzeko produktuak",
-      "notFound": "Produktua ez da aurkitu"
     }
+  },
+  "shop": {
+    "title": "Denda"
+  },
+  "productDetail": {
+    "back": "Atzera",
+    "home": "Hasiera",
+    "buyNow": "Orain erosi",
+    "addToCart": "Saskira gehitu",
+    "adding": "Gehitzen...",
+    "quantity": "Kopurua",
+    "similarProducts": "Antzeko produktuak",
+    "notFound": "Produktua ez da aurkitu"
   }
 }

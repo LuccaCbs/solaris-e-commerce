@@ -299,19 +299,19 @@
       "mapGeocodeNotFound": "No s'ha trobat l'adreça",
       "mapGeocodeError": "Error en cercar la ubicació",
       "contactInfo": "Informació de contacte"
-    },
-    "shop": {
-      "title": "Botiga"
-    },
-    "productDetail": {
-      "back": "Tornar",
-      "home": "Inici",
-      "buyNow": "Comprar ara",
-      "addToCart": "Afegir al carret",
-      "adding": "Afegint...",
-      "quantity": "Quantitat",
-      "similarProducts": "Productes similars",
-      "notFound": "Producte no trobat"
     }
+  },
+  "shop": {
+    "title": "Botiga"
+  },
+  "productDetail": {
+    "back": "Tornar",
+    "home": "Inici",
+    "buyNow": "Comprar ara",
+    "addToCart": "Afegir al carret",
+    "adding": "Afegint...",
+    "quantity": "Quantitat",
+    "similarProducts": "Productes similars",
+    "notFound": "Producte no trobat"
   }
 }

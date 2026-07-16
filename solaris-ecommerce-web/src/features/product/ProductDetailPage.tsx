@@ -11,7 +11,7 @@ import { productImageService } from '../../api/productImageService'
 import { FeaturedProduct } from '../../api/featuredProductService'
 import { useAddToCart } from '../../hooks/useAddToCart'
 
-const SIMILAR_VISIBLE = 4
+const SIMILAR_VISIBLE = 5
 
 const ProductDetailPage = () => {
   const { t } = useTranslation()
@@ -239,7 +239,7 @@ const ProductDetailPage = () => {
 
         {similarProducts.length > 0 && (
           <section className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('productDetail.similarProducts')}</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">{t('productDetail.similarProducts')}</h2>
             <div className="relative">
               {hasCarousel && (
                 <button
@@ -248,23 +248,13 @@ const ProductDetailPage = () => {
                     setSimilarStart((prev) => (prev - 1 + similarProducts.length) % similarProducts.length)
                   }
                   aria-label="Anterior"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/95 border border-gray-200 rounded-full p-2 shadow hover:bg-gray-50"
+                  className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 rounded-full p-1.5 shadow-sm hover:bg-gray-50"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4" />
                 </button>
               )}
 
-              <div
-                className={`grid gap-4 ${
-                  visibleSimilar.length === 1
-                    ? 'grid-cols-1'
-                    : visibleSimilar.length === 2
-                      ? 'grid-cols-2'
-                      : visibleSimilar.length === 3
-                        ? 'grid-cols-3'
-                        : 'grid-cols-2 md:grid-cols-4'
-                } ${hasCarousel ? 'px-10' : ''}`}
-              >
+              <div className={`flex gap-3 overflow-hidden ${hasCarousel ? 'px-6' : ''}`}>
                 {visibleSimilar.map((item) => (
                   <SimilarProductCard
                     key={item.id}
@@ -281,9 +271,9 @@ const ProductDetailPage = () => {
                   type="button"
                   onClick={() => setSimilarStart((prev) => (prev + 1) % similarProducts.length)}
                   aria-label="Siguiente"
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/95 border border-gray-200 rounded-full p-2 shadow hover:bg-gray-50"
+                  className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 rounded-full p-1.5 shadow-sm hover:bg-gray-50"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4" />
                 </button>
               )}
             </div>
