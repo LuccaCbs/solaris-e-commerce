@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "order_items")
@@ -40,4 +42,8 @@ public class OrderItem {
 
     @Column(length = 255)
     private String productBarcode;
+
+    @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ProductOrderDetail> details = new ArrayList<>();
 }

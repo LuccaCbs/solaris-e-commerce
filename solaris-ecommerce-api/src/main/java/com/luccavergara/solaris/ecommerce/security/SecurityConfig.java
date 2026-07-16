@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/products/paginated").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/{productId}/images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/product-forms/by-product/{productId}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/store-config/**").permitAll()
                         .requestMatchers("/cart/**").permitAll()

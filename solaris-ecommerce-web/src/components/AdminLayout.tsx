@@ -10,6 +10,7 @@ import {
   Tags,
   Palette,
   Menu,
+  FileText,
 } from 'lucide-react'
 import AppHeader from './AppHeader'
 
@@ -18,6 +19,7 @@ const adminNavItems = [
   { path: '/admin/products', labelKey: 'nav.products', icon: Package },
   { path: '/admin/categories', labelKey: 'nav.categories', icon: FolderTree },
   { path: '/admin/menu-config', labelKey: 'admin.menuConfig.title', icon: Menu },
+  { path: '/admin/form-config', labelKey: 'admin.formConfig.title', icon: FileText },
   { path: '/admin/featured', labelKey: 'nav.featured', icon: Star },
   { path: '/admin/featured-categories', labelKey: 'admin.featuredCategories.title', icon: Tags },
   { path: '/admin/customers', labelKey: 'admin.customer.title', icon: Users },

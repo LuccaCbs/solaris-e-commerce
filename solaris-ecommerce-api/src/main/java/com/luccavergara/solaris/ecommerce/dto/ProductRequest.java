@@ -36,4 +36,6 @@ public class ProductRequest {
     private ProductIvaRate ivaRate = ProductIvaRate.GENERAL_21;
 
     private Boolean active = true;
+
+    private Boolean madeToOrder = false;
 }

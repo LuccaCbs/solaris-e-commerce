@@ -22,6 +22,7 @@ type ProductFormData = {
   categoryId: string
   ivaRate: string
   lowStockThreshold: string
+  madeToOrder: boolean
 }
 
 const emptyForm: ProductFormData = {
@@ -33,6 +34,7 @@ const emptyForm: ProductFormData = {
   categoryId: '',
   ivaRate: 'GENERAL_21',
   lowStockThreshold: '',
+  madeToOrder: false,
 }
 
 const uploadImages = async (productId: number, files: File[]) => {
@@ -167,6 +169,7 @@ const ProductManagementPage = () => {
       categoryId: product.categoryId?.toString() || String(generalCategory?.id || ''),
       ivaRate: product.ivaRate,
       lowStockThreshold: product.lowStockThreshold?.toString() || '',
+      madeToOrder: Boolean(product.madeToOrder),
     })
     setPendingFiles([])
     await loadProductImages(product.id)
@@ -205,6 +208,7 @@ const ProductManagementPage = () => {
     categoryId: Number(formData.categoryId),
     ivaRate: formData.ivaRate,
     lowStockThreshold: formData.lowStockThreshold ? Number(formData.lowStockThreshold) : null,
+    madeToOrder: formData.madeToOrder,
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -336,6 +340,10 @@ const ProductManagementPage = () => {
                     <span className="text-gray-500">{t('admin.product.status')}:</span>{' '}
                     <strong>{selectedProduct.active ? t('admin.product.active') : t('admin.product.inactive')}</strong>
                   </div>
+                  <div>
+                    <span className="text-gray-500">{t('admin.product.madeToOrder')}:</span>{' '}
+                    <strong>{selectedProduct.madeToOrder ? t('common.yes') : t('common.no')}</strong>
+                  </div>
                 </div>
                 {selectedProduct.description && (
                   <div className="text-sm">
@@ -389,6 +397,15 @@ const ProductManagementPage = () => {
                   <input value={formData.barcode} onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" />
                 </div>
+
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={formData.madeToOrder}
+                    onChange={(e) => setFormData({ ...formData, madeToOrder: e.target.checked })}
+                  />
+                  {t('admin.product.madeToOrder')}
+                </label>
 
                 {modalMode === 'edit' && existingImages.length > 0 && (
                   <div>

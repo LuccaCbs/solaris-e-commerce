@@ -53,6 +53,7 @@ public class ProductService {
                 .category(category)
                 .ivaRate(request.getIvaRate())
                 .active(request.getActive() != null ? request.getActive() : true)
+                .madeToOrder(request.getMadeToOrder() != null ? request.getMadeToOrder() : false)
                 .user(user)
                 .createdBy(user)
                 .createdAt(LocalDateTime.now())
@@ -95,6 +96,9 @@ public class ProductService {
         }
         if (request.getActive() != null) {
             product.setActive(request.getActive());
+        }
+        if (request.getMadeToOrder() != null) {
+            product.setMadeToOrder(request.getMadeToOrder());
         }
 
         product = productRepository.save(product);
@@ -236,6 +240,7 @@ public class ProductService {
                 .active(product.getActive())
                 .ivaRate(product.getIvaRate())
                 .lowStock(lowStock)
+                .madeToOrder(product.getMadeToOrder())
                 .build();
     }
 }

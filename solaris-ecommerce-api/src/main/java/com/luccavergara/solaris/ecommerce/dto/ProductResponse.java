@@ -29,4 +29,5 @@ public class ProductResponse {
     private Boolean active;
     private ProductIvaRate ivaRate;
     private Boolean lowStock;
+    private Boolean madeToOrder;
 }

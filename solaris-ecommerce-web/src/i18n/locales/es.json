@@ -192,7 +192,8 @@
       "imageRemoved": "Imagen eliminada",
       "confirmRemoveImage": "¿Eliminar esta imagen?",
       "noResults": "No se encontraron productos con ese criterio",
-      "error": "Error al procesar el producto"
+      "error": "Error al procesar el producto",
+      "madeToOrder": "A pedido / Encargo"
     },
     "category": {
       "title": "Gestión de Categorías",
@@ -273,6 +274,40 @@
     },
     "menuConfig": {
       "title": "Configuración de Menús"
+    },
+    "formConfig": {
+      "title": "Configuración de forms",
+      "subtitle": "Definí los campos personalizados para productos a pedido",
+      "new": "Nuevo formulario",
+      "edit": "Editar formulario",
+      "empty": "No hay formularios configurados",
+      "fieldsCount": "Campos",
+      "fields": "Campos del formulario",
+      "field": "Campo",
+      "addField": "Agregar campo",
+      "fieldLabel": "Etiqueta",
+      "fieldKey": "Clave interna",
+      "fieldType": "Tipo de campo",
+      "placeholder": "Placeholder",
+      "options": "Opciones",
+      "optionsPlaceholder": "Una opción por línea",
+      "required": "Obligatorio",
+      "formActive": "Formulario activo",
+      "selectProduct": "Seleccionar producto",
+      "productRequired": "Seleccioná un producto",
+      "fieldLabelRequired": "Todas las etiquetas de campo son obligatorias",
+      "saved": "Formulario guardado exitosamente",
+      "deleted": "Formulario eliminado exitosamente",
+      "error": "Error al procesar el formulario",
+      "confirmDelete": "¿Eliminar este formulario?",
+      "fieldTypes": {
+        "TEXT": "Texto",
+        "TEXTAREA": "Texto largo",
+        "NUMBER": "Número",
+        "SELECT": "Lista desplegable",
+        "COLOR": "Color",
+        "CHECKBOX": "Casilla de verificación"
+      }
     },
     "featuredCategories": {
       "title": "Categorías Expuestas",

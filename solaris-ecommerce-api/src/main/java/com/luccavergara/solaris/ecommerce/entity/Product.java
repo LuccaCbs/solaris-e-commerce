@@ -63,6 +63,10 @@ public class Product {
     @Column(nullable = false)
     private Boolean active = true;
 
+    @Column(name = "made_to_order", nullable = false)
+    @Builder.Default
+    private Boolean madeToOrder = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "iva_rate", nullable = false)
     @Builder.Default

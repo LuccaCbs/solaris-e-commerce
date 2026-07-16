@@ -5,20 +5,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderItemResponse {
+public class ProductFormResponse {
     private Long id;
     private Long productId;
     private String productName;
-    private String productBarcode;
-    private Integer quantity;
-    private BigDecimal unitPrice;
-    private BigDecimal totalPrice;
-    private List<ProductOrderDetailResponse> details;
+    private Boolean productMadeToOrder;
+    private Boolean active;
+    private List<ProductFormFieldResponse> fields;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

@@ -162,7 +162,8 @@
       "created": "Product created successfully",
       "updated": "Product updated successfully",
       "deleted": "Product deleted successfully",
-      "error": "Error processing product"
+      "error": "Error processing product",
+      "madeToOrder": "Made to order"
     },
     "category": {
       "title": "Category Management",
@@ -243,6 +244,40 @@
     },
     "menuConfig": {
       "title": "Menu Configuration"
+    },
+    "formConfig": {
+      "title": "Form Configuration",
+      "subtitle": "Define custom fields for made-to-order products",
+      "new": "New form",
+      "edit": "Edit form",
+      "empty": "No forms configured",
+      "fieldsCount": "Fields",
+      "fields": "Form fields",
+      "field": "Field",
+      "addField": "Add field",
+      "fieldLabel": "Label",
+      "fieldKey": "Internal key",
+      "fieldType": "Field type",
+      "placeholder": "Placeholder",
+      "options": "Options",
+      "optionsPlaceholder": "One option per line",
+      "required": "Required",
+      "formActive": "Form active",
+      "selectProduct": "Select product",
+      "productRequired": "Select a product",
+      "fieldLabelRequired": "All field labels are required",
+      "saved": "Form saved successfully",
+      "deleted": "Form deleted successfully",
+      "error": "Error processing form",
+      "confirmDelete": "Delete this form?",
+      "fieldTypes": {
+        "TEXT": "Text",
+        "TEXTAREA": "Long text",
+        "NUMBER": "Number",
+        "SELECT": "Dropdown",
+        "COLOR": "Color",
+        "CHECKBOX": "Checkbox"
+      }
     },
     "featuredCategories": {
       "title": "Featured Categories",

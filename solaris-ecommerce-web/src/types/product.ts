@@ -17,6 +17,7 @@ export type Product = {
   categoryId?: number
   categoryName?: string
   lowStock?: boolean
+  madeToOrder?: boolean
 }
 
 export type Page<T> = {
