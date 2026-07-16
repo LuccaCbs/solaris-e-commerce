@@ -1,7 +1,8 @@
-import { X } from 'lucide-react'
+import { X, ShoppingCart } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import ProductImageSlider from './ProductImageSlider'
 import { FeaturedProduct } from '../api/featuredProductService'
+import { useAddToCart } from '../hooks/useAddToCart'
 
 type ProductDetailModalProps = {
   product: FeaturedProduct
@@ -10,6 +11,7 @@ type ProductDetailModalProps = {
 
 const ProductDetailModal = ({ product, onClose }: ProductDetailModalProps) => {
   const { t } = useTranslation()
+  const { addToCart, isAdding } = useAddToCart(product)
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -56,9 +58,20 @@ const ProductDetailModal = ({ product, onClose }: ProductDetailModalProps) => {
               <p className="mt-1 text-gray-800">{product.productDescription}</p>
             </div>
           )}
-          <button onClick={onClose} className="w-full py-2 border rounded-lg hover:bg-gray-50">
-            {t('common.cancel')}
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={addToCart}
+              disabled={isAdding || product.stockQuantity <= 0}
+              className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              {isAdding ? t('productDetail.adding') : t('catalog.addToCart')}
+            </button>
+            <button onClick={onClose} className="w-full py-2 border rounded-lg hover:bg-gray-50">
+              {t('common.cancel')}
+            </button>
+          </div>
         </div>
       </div>
     </div>

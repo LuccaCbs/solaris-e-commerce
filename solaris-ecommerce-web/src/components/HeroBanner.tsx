@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAppearance } from '../context/ThemeContext'
 import { toImageSrc } from '../api/productImageService'
 
 const HeroBanner = () => {
+  const { t } = useTranslation()
   const appearance = useAppearance()
   const [currentIndex, setCurrentIndex] = useState(0)
   const images = appearance.heroImages || []
@@ -66,7 +68,7 @@ const HeroBanner = () => {
               to="/shop"
               className="inline-block mt-6 px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition"
             >
-              Shop
+              {t('shop.title')}
             </Link>
           </div>
         </div>

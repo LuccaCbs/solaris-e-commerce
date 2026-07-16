@@ -103,7 +103,8 @@
     "addToCart": "Afegir a la cistella",
     "outOfStock": "Esgotat",
     "noProducts": "No s'han trobat productes",
-    "loadingProducts": "Carregant productes..."
+    "loadingProducts": "Carregant productes...",
+    "featuredProducts": "Nabarmendutako produktuak"
   },
   "cart": {
     "title": "Cistella de la Compra",

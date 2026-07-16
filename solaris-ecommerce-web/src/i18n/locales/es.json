@@ -109,7 +109,8 @@
     "addToCart": "Agregar al carrito",
     "outOfStock": "Agotado",
     "noProducts": "No se encontraron productos",
-    "loadingProducts": "Cargando productos..."
+    "loadingProducts": "Cargando productos...",
+    "featuredProducts": "Productos destacados"
   },
   "cart": {
     "title": "Carrito de Compras",
