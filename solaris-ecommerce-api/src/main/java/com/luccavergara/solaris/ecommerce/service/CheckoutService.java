@@ -3,6 +3,7 @@ package com.luccavergara.solaris.ecommerce.service;
 import com.luccavergara.solaris.ecommerce.dto.CheckoutRequest;
 import com.luccavergara.solaris.ecommerce.dto.CheckoutResponse;
 import com.luccavergara.solaris.ecommerce.dto.OrderItemResponse;
+import com.luccavergara.solaris.ecommerce.dto.ProductOrderDetailResponse;
 import com.luccavergara.solaris.ecommerce.entity.*;
 import com.luccavergara.solaris.ecommerce.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -89,10 +91,26 @@ public class CheckoutService {
                     .totalPrice(cartItem.getTotalPrice())
                     .productName(cartItem.getProductName())
                     .productBarcode(cartItem.getProductBarcode())
+                    .details(new ArrayList<>())
                     .build();
 
             orderItemRepository.save(orderItem);
             order.getItems().add(orderItem);
+
+            if (cartItem.getDetails() != null) {
+                for (CartItemDetail cartDetail : cartItem.getDetails()) {
+                    ProductOrderDetail orderDetail = ProductOrderDetail.builder()
+                            .order(order)
+                            .orderItem(orderItem)
+                            .product(product)
+                            .productFormField(cartDetail.getProductFormField())
+                            .fieldKey(cartDetail.getFieldKey())
+                            .fieldLabel(cartDetail.getFieldLabel())
+                            .fieldValue(cartDetail.getFieldValue())
+                            .build();
+                    orderItem.getDetails().add(orderDetail);
+                }
+            }
 
             // Actualizar stock
             product.setStockQuantity(product.getStockQuantity() - cartItem.getQuantity());
@@ -163,6 +181,20 @@ public class CheckoutService {
     }
 
     private OrderItemResponse mapOrderItemToResponse(OrderItem item) {
+        List<ProductOrderDetailResponse> details = item.getDetails() != null
+                ? item.getDetails().stream().map(detail -> ProductOrderDetailResponse.builder()
+                        .id(detail.getId())
+                        .orderId(detail.getOrder() != null ? detail.getOrder().getId() : null)
+                        .orderItemId(detail.getOrderItem() != null ? detail.getOrderItem().getId() : null)
+                        .productId(detail.getProduct() != null ? detail.getProduct().getId() : null)
+                        .productFormFieldId(detail.getProductFormField() != null ? detail.getProductFormField().getId() : null)
+                        .fieldKey(detail.getFieldKey())
+                        .fieldLabel(detail.getFieldLabel())
+                        .fieldValue(detail.getFieldValue())
+                        .build())
+                .collect(Collectors.toList())
+                : List.of();
+
         return OrderItemResponse.builder()
                 .id(item.getId())
                 .productId(item.getProduct() != null ? item.getProduct().getId() : null)
@@ -171,6 +203,7 @@ public class CheckoutService {
                 .quantity(item.getQuantity())
                 .unitPrice(item.getUnitPrice())
                 .totalPrice(item.getTotalPrice())
+                .details(details)
                 .build();
     }
 

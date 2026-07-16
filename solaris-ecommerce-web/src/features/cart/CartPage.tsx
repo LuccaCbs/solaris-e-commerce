@@ -152,26 +152,41 @@ const CartPage = () => {
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900">{item.productName}</h3>
                       <p className="text-sm text-gray-600">{item.productBarcode}</p>
+                      {item.details && item.details.length > 0 && (
+                        <ul className="mt-2 space-y-0.5">
+                          {item.details.map((detail) => (
+                            <li key={`${detail.fieldKey}-${detail.id}`} className="text-xs text-gray-600">
+                              <span className="font-medium">{detail.fieldLabel}:</span> {detail.fieldValue}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       <p className="text-lg font-semibold text-gray-900 mt-1">
                         ${item.unitPrice.toFixed(2)}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleQuantityChange(item.id, item.quantity, -1)}
-                        disabled={item.quantity <= 1}
-                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="w-8 text-center font-medium">{item.quantity}</span>
-                      <button
-                        onClick={() => handleQuantityChange(item.id, item.quantity, 1)}
-                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
+                      {item.details && item.details.length > 0 ? (
+                        <span className="text-sm text-gray-500 w-20 text-center">{item.quantity}</span>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleQuantityChange(item.id, item.quantity, -1)}
+                            disabled={item.quantity <= 1}
+                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="w-8 text-center font-medium">{item.quantity}</span>
+                          <button
+                            onClick={() => handleQuantityChange(item.id, item.quantity, 1)}
+                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
                     </div>
 
                     <div className="text-right">

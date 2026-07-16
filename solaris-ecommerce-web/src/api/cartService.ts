@@ -1,5 +1,12 @@
 import apiClient from './axiosClient'
 
+export type CartItemDetail = {
+  productFormFieldId?: number
+  fieldKey: string
+  fieldLabel: string
+  fieldValue: string
+}
+
 export interface CartItem {
   id: number
   productId: number
@@ -8,6 +15,7 @@ export interface CartItem {
   quantity: number
   unitPrice: number
   totalPrice: number
+  details?: CartItemDetail[]
 }
 
 export interface Cart {
@@ -36,7 +44,8 @@ export const cartService = {
     userId: number | undefined,
     cartIdentifier: string | undefined,
     productId: number,
-    quantity: number
+    quantity: number,
+    details?: CartItemDetail[]
   ): Promise<Cart> => {
     const headers: Record<string, string> = {}
     if (userId) headers['X-User-Id'] = userId.toString()
@@ -44,7 +53,7 @@ export const cartService = {
     const params = cartIdentifier ? { cartIdentifier } : {}
     
     const response = await apiClient.post('/cart/items', 
-      { productId, quantity },
+      { productId, quantity, details },
       { headers, params }
     )
     return response.data

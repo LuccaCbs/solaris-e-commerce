@@ -405,6 +405,12 @@
     "adding": "Agregando...",
     "quantity": "Cantidad",
     "similarProducts": "Productos similares",
-    "notFound": "Producto no encontrado"
+    "notFound": "Producto no encontrado",
+    "madeToOrder": "A pedido",
+    "customization": "Personalización",
+    "formNotConfigured": "Este producto está marcado como a pedido pero aún no tiene un formulario configurado.",
+    "fieldRequired": "Este campo es obligatorio",
+    "addedToCart": "Producto agregado al carrito",
+    "addToCartError": "Error al agregar al carrito"
   }
 }

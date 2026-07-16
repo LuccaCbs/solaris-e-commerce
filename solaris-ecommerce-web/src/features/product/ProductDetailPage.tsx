@@ -1,29 +1,47 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ChevronLeft, ChevronRight, Home, Minus, Plus, ShoppingCart } from 'lucide-react'
+import toast from 'react-hot-toast'
 import AppHeader from '../../components/AppHeader'
 import ProductImageGallery from '../../components/ProductImageGallery'
+import ProductCustomForm from '../../components/ProductCustomForm'
 import SimilarProductCard from '../../components/SimilarProductCard'
 import { productService } from '../../api/productService'
 import { productImageService } from '../../api/productImageService'
-import { FeaturedProduct } from '../../api/featuredProductService'
-import { useAddToCart } from '../../hooks/useAddToCart'
+import { productFormService } from '../../api/productFormService'
+import { cartService, CartItemDetail } from '../../api/cartService'
+import { ProductForm } from '../../types/productForm'
+import { getStoredUser } from '../../utils/auth'
 
 const SIMILAR_VISIBLE = 5
+
+const buildInitialValues = (form?: ProductForm | null) => {
+  const values: Record<string, string> = {}
+  form?.fields.forEach((field) => {
+    values[field.fieldKey] = field.fieldType === 'CHECKBOX' ? '' : ''
+  })
+  return values
+}
 
 const ProductDetailPage = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const user = getStoredUser()
   const { id } = useParams<{ id: string }>()
   const productId = Number(id)
   const [quantity, setQuantity] = useState(1)
   const [similarStart, setSimilarStart] = useState(0)
+  const [formValues, setFormValues] = useState<Record<string, string>>({})
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     setQuantity(1)
     setSimilarStart(0)
+    setFormValues({})
+    setFormErrors({})
   }, [productId])
 
   const { data: product, isLoading, isError } = useQuery({
@@ -37,6 +55,25 @@ const ProductDetailPage = () => {
     queryFn: () => productImageService.getByProduct(productId),
     enabled: Number.isFinite(productId) && productId > 0,
   })
+
+  const { data: productForm } = useQuery({
+    queryKey: ['product-form', productId],
+    queryFn: async () => {
+      try {
+        return await productFormService.getByProduct(productId)
+      } catch {
+        return null
+      }
+    },
+    enabled: Boolean(product?.madeToOrder),
+  })
+
+  useEffect(() => {
+    if (productForm) {
+      setFormValues(buildInitialValues(productForm))
+      setFormErrors({})
+    }
+  }, [productForm])
 
   const { data: similarProducts = [] } = useQuery({
     queryKey: ['similar-products', product?.categoryId, productId],
@@ -55,35 +92,34 @@ const ProductDetailPage = () => {
     enabled: Boolean(product?.categoryId),
   })
 
-  const featuredLike: FeaturedProduct | null = product
-    ? {
-        id: product.id,
-        productId: product.id,
-        productName: product.name,
-        productDescription: product.description,
-        price: product.price,
-        stockQuantity: product.stockQuantity,
-        categoryName: product.categoryName,
-        cardType: 'BASIC',
-        displayOrder: 0,
-        active: product.active !== false,
-        images,
+  const addToCartMutation = useMutation({
+    mutationFn: (details?: CartItemDetail[]) => {
+      const cartIdentifier = localStorage.getItem('cartIdentifier')
+      return cartService.addItemToCart(
+        user?.id,
+        cartIdentifier || undefined,
+        productId,
+        quantity,
+        details
+      )
+    },
+    onSuccess: (data) => {
+      if (data.cartIdentifier) {
+        localStorage.setItem('cartIdentifier', data.cartIdentifier)
       }
-    : null
+      queryClient.invalidateQueries({ queryKey: ['cart'] })
+      toast.success(t('productDetail.addedToCart'))
+    },
+    onError: (error: unknown) => {
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        t('productDetail.addToCartError')
+      toast.error(message)
+    },
+  })
 
-  const { addToCart, isAdding } = useAddToCart(
-    featuredLike ?? {
-      id: 0,
-      productId: 0,
-      productName: '',
-      price: 0,
-      stockQuantity: 0,
-      cardType: 'BASIC',
-      displayOrder: 0,
-      active: false,
-      images: [],
-    }
-  )
+  const isMadeToOrder = Boolean(product?.madeToOrder)
+  const formReady = !isMadeToOrder || (productForm && productForm.active && productForm.fields.length > 0)
 
   const maxQuantity = product?.stockQuantity ?? 0
   const hasCarousel = similarProducts.length > SIMILAR_VISIBLE
@@ -94,8 +130,56 @@ const ProductDetailPage = () => {
       })
     : similarProducts
 
+  const sortedFormFields = useMemo(
+    () => (productForm?.fields || []).slice().sort((a, b) => a.displayOrder - b.displayOrder),
+    [productForm]
+  )
+
   const decreaseQuantity = () => setQuantity((q) => Math.max(1, q - 1))
   const increaseQuantity = () => setQuantity((q) => Math.min(maxQuantity, q + 1))
+
+  const handleFormChange = (fieldKey: string, value: string) => {
+    setFormValues((prev) => ({ ...prev, [fieldKey]: value }))
+    setFormErrors((prev) => {
+      const next = { ...prev }
+      delete next[fieldKey]
+      return next
+    })
+  }
+
+  const validateCustomForm = () => {
+    if (!isMadeToOrder || !productForm) return true
+
+    const errors: Record<string, string> = {}
+    sortedFormFields.forEach((field) => {
+      const value = formValues[field.fieldKey]
+      if (field.required && (!value || !value.trim())) {
+        errors[field.fieldKey] = t('productDetail.fieldRequired')
+      }
+    })
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const buildCartDetails = (): CartItemDetail[] | undefined => {
+    if (!isMadeToOrder || !productForm) return undefined
+
+    return sortedFormFields
+      .map((field) => ({
+        productFormFieldId: field.id,
+        fieldKey: field.fieldKey,
+        fieldLabel: field.label,
+        fieldValue: formValues[field.fieldKey] ?? '',
+      }))
+      .filter((detail) => detail.fieldValue.trim().length > 0)
+  }
+
+  const handleAddToCart = () => {
+    if (!product || product.stockQuantity <= 0) return
+    if (!validateCustomForm()) return
+    addToCartMutation.mutate(buildCartDetails())
+  }
 
   if (isLoading) {
     return (
@@ -106,7 +190,7 @@ const ProductDetailPage = () => {
     )
   }
 
-  if (isError || !product || !featuredLike) {
+  if (isError || !product) {
     return (
       <div className="min-h-screen bg-gray-100">
         <AppHeader showSearch={false} />
@@ -151,9 +235,16 @@ const ProductDetailPage = () => {
             </div>
 
             <div className="lg:col-span-4 flex flex-col">
-              {product.categoryName && (
-                <p className="text-sm text-gray-500 mb-2">{product.categoryName}</p>
-              )}
+              <div className="flex items-center gap-2 mb-2">
+                {product.categoryName && (
+                  <p className="text-sm text-gray-500">{product.categoryName}</p>
+                )}
+                {isMadeToOrder && (
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">
+                    {t('productDetail.madeToOrder')}
+                  </span>
+                )}
+              </div>
               <h1 className="text-2xl md:text-3xl font-normal text-gray-900 leading-tight mb-4">
                 {product.name}
               </h1>
@@ -168,6 +259,26 @@ const ProductDetailPage = () => {
                   <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
                     {product.description}
                   </p>
+                </div>
+              )}
+
+              {isMadeToOrder && (
+                <div>
+                  <h2 className="text-base font-semibold text-gray-900 mt-4 mb-1">
+                    {t('productDetail.customization')}
+                  </h2>
+                  {!formReady ? (
+                    <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                      {t('productDetail.formNotConfigured')}
+                    </p>
+                  ) : (
+                    <ProductCustomForm
+                      fields={sortedFormFields}
+                      values={formValues}
+                      errors={formErrors}
+                      onChange={handleFormChange}
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -225,12 +336,12 @@ const ProductDetailPage = () => {
 
                 <button
                   type="button"
-                  onClick={(e) => addToCart(e, quantity)}
-                  disabled={isAdding || product.stockQuantity <= 0}
+                  onClick={handleAddToCart}
+                  disabled={addToCartMutation.isPending || product.stockQuantity <= 0 || !formReady}
                   className="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-md font-medium hover:bg-blue-50 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ShoppingCart className="w-5 h-5" />
-                  {isAdding ? t('productDetail.adding') : t('productDetail.addToCart')}
+                  {addToCartMutation.isPending ? t('productDetail.adding') : t('productDetail.addToCart')}
                 </button>
               </div>
             </div>

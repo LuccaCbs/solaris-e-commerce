@@ -353,7 +353,13 @@
     "addToCart": "Add to cart",
     "adding": "Adding...",
     "quantity": "Quantity",
-    "similarProducts": "Similar products",
-    "notFound": "Product not found"
-  }
+      "similarProducts": "Similar products",
+      "notFound": "Product not found",
+      "madeToOrder": "Made to order",
+      "customization": "Customization",
+      "formNotConfigured": "This product is made to order but does not have a form configured yet.",
+      "fieldRequired": "This field is required",
+      "addedToCart": "Product added to cart",
+      "addToCartError": "Error adding to cart"
+    }
 }
