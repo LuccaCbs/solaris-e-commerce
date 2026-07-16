@@ -1,6 +1,7 @@
 import apiClient from './axiosClient'
 
 export type CartItemDetail = {
+  id?: number
   productFormFieldId?: number
   fieldKey: string
   fieldLabel: string
