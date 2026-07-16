@@ -11,9 +11,9 @@ export const useAddToCart = (item: FeaturedProduct) => {
   const user = getStoredUser()
 
   const mutation = useMutation({
-    mutationFn: () => {
+    mutationFn: (quantity: number) => {
       const cartIdentifier = localStorage.getItem('cartIdentifier')
-      return cartService.addItemToCart(user?.id, cartIdentifier || undefined, item.productId, 1)
+      return cartService.addItemToCart(user?.id, cartIdentifier || undefined, item.productId, quantity)
     },
     onSuccess: (data) => {
       if (data.cartIdentifier) {
@@ -32,14 +32,14 @@ export const useAddToCart = (item: FeaturedProduct) => {
     },
   })
 
-  const addToCart = (e?: React.MouseEvent) => {
+  const addToCart = (e?: React.MouseEvent, quantity = 1) => {
     e?.stopPropagation()
     if (item.stockQuantity <= 0) {
       toast.error('Producto sin stock')
       return
     }
     setIsAdding(true)
-    mutation.mutate()
+    mutation.mutate(quantity)
   }
 
   return { addToCart, isAdding }

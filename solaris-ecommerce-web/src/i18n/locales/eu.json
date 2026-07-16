@@ -302,6 +302,16 @@
     },
     "shop": {
       "title": "Denda"
+    },
+    "productDetail": {
+      "back": "Atzera",
+      "home": "Hasiera",
+      "buyNow": "Orain erosi",
+      "addToCart": "Saskira gehitu",
+      "adding": "Gehitzen...",
+      "quantity": "Kopurua",
+      "similarProducts": "Antzeko produktuak",
+      "notFound": "Produktua ez da aurkitu"
     }
   }
 }

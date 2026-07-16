@@ -359,6 +359,16 @@
     },
     "shop": {
       "title": "Tienda"
+    },
+    "productDetail": {
+      "back": "Volver",
+      "home": "Inicio",
+      "buyNow": "Comprar ahora",
+      "addToCart": "Agregar al carrito",
+      "adding": "Agregando...",
+      "quantity": "Cantidad",
+      "similarProducts": "Productos similares",
+      "notFound": "Producto no encontrado"
     }
   }
 }

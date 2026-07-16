@@ -54,7 +54,7 @@ const SubmenuProductList = ({
           {column.map((product) => (
             <Link
               key={product.id}
-              to={`/?productId=${product.id}`}
+              to={`/products/${product.id}`}
               className="menu-item-link block text-sm font-normal transition-colors"
               onClick={onNavigate}
             >
@@ -225,7 +225,7 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
                     {category.subcategories.map((sub) => (
                       <div key={sub.id}>
                         <Link
-                          to={`/?categoryId=${sub.id}`}
+                          to={`/shop?categoryId=${sub.id}`}
                           className="block text-sm font-semibold submenu-link"
                           onClick={closeMenus}
                         >
@@ -270,7 +270,7 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
                   {hoveredMenu.subcategories.map((sub) => (
                     <div key={sub.id} className="flex flex-col gap-3">
                       <Link
-                        to={`/?categoryId=${sub.id}`}
+                        to={`/shop?categoryId=${sub.id}`}
                         className="submenu-link text-sm font-bold uppercase tracking-wide transition-colors"
                         onClick={closeMenus}
                       >

@@ -308,6 +308,16 @@
     },
     "shop": {
       "title": "Shop"
+    },
+    "productDetail": {
+      "back": "Back",
+      "home": "Home",
+      "buyNow": "Buy now",
+      "addToCart": "Add to cart",
+      "adding": "Adding...",
+      "quantity": "Quantity",
+      "similarProducts": "Similar products",
+      "notFound": "Product not found"
     }
   }
 }

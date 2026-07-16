@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import HomePage from '../features/home/HomePage'
 import ShopPage from '../features/shop/ShopPage'
+import ProductDetailPage from '../features/product/ProductDetailPage'
 import LoginPage from '../features/auth/LoginPage'
 import RegisterPage from '../features/auth/RegisterPage'
 import VerifyEmailPage from '../features/auth/VerifyEmailPage'
@@ -23,6 +24,7 @@ const AppRouter = () => {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/shop" element={<ShopPage />} />
+      <Route path="/products/:id" element={<ProductDetailPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
