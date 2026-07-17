@@ -343,7 +343,28 @@
       "mapGeocodeSuccess": "Kokapena aurkitua",
       "mapGeocodeNotFound": "Helbidea ez da aurkitu",
       "mapGeocodeError": "Errorea kokapena bilatzean",
-      "contactInfo": "Kontaktu informazioa"
+      "contactInfo": "Kontaktu informazioa",
+      "tabs": {
+        "themes": "Gaiak eta koloreak",
+        "branding": "Marka identitatea",
+        "content": "Gunearen edukia"
+      },
+      "brandingTitle": "Marka identitatea",
+      "brandingPreview": "Goiburuaren aurrebista",
+      "storeName": "Dendaren izena",
+      "storeNamePlaceholder": "Adib: Nire Denda",
+      "fontFamily": "Izenaren tipografia",
+      "brandingMode": "Goiburuan erakutsi",
+      "brandingModes": {
+        "TEXT": "Dendaren izena soilik",
+        "LOGO": "Logoa soilik (izena ezkutatu)",
+        "TEXT_AND_LOGO": "Logoa eta izena"
+      },
+      "logo": "Dendaren logoa",
+      "uploadLogo": "Logoa igo",
+      "removeLogo": "Logoa kendu",
+      "logoHint": "Gomendatua: PNG edo SVG atzeko plano gardenarekin. Gehienez ~500 KB.",
+      "logoRequiredHint": "Igo logo bat \"Logoa soilik\" modua erabiltzeko."
     }
   },
   "shop": {

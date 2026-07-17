@@ -435,7 +435,28 @@
       "mapGeocodeSuccess": "Ubicación encontrada",
       "mapGeocodeNotFound": "No se encontró la dirección",
       "mapGeocodeError": "Error al buscar la ubicación",
-      "contactInfo": "Información de contacto"
+      "contactInfo": "Información de contacto",
+      "tabs": {
+        "themes": "Temas y colores",
+        "branding": "Identidad de marca",
+        "content": "Contenido del sitio"
+      },
+      "brandingTitle": "Identidad de marca",
+      "brandingPreview": "Vista previa del header",
+      "storeName": "Nombre de la tienda",
+      "storeNamePlaceholder": "Ej: Mi Tienda",
+      "fontFamily": "Tipografía del nombre",
+      "brandingMode": "Mostrar en el header",
+      "brandingModes": {
+        "TEXT": "Solo nombre de la tienda",
+        "LOGO": "Solo logo (oculta el nombre)",
+        "TEXT_AND_LOGO": "Logo y nombre"
+      },
+      "logo": "Logo de la tienda",
+      "uploadLogo": "Subir logo",
+      "removeLogo": "Quitar logo",
+      "logoHint": "Recomendado: PNG o SVG con fondo transparente. Máx. ~500 KB.",
+      "logoRequiredHint": "Subí un logo para usar el modo \"Solo logo\"."
     }
   },
   "shop": {

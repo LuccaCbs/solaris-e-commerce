@@ -343,7 +343,28 @@
       "mapGeocodeSuccess": "Ubicació trobada",
       "mapGeocodeNotFound": "No s'ha trobat l'adreça",
       "mapGeocodeError": "Error en cercar la ubicació",
-      "contactInfo": "Informació de contacte"
+      "contactInfo": "Informació de contacte",
+      "tabs": {
+        "themes": "Temes i colors",
+        "branding": "Identitat de marca",
+        "content": "Contingut del lloc"
+      },
+      "brandingTitle": "Identitat de marca",
+      "brandingPreview": "Vista prèvia del header",
+      "storeName": "Nom de la botiga",
+      "storeNamePlaceholder": "Ex: La Meva Botiga",
+      "fontFamily": "Tipografia del nom",
+      "brandingMode": "Mostrar al header",
+      "brandingModes": {
+        "TEXT": "Només nom de la botiga",
+        "LOGO": "Només logo (amaga el nom)",
+        "TEXT_AND_LOGO": "Logo i nom"
+      },
+      "logo": "Logo de la botiga",
+      "uploadLogo": "Pujar logo",
+      "removeLogo": "Treure logo",
+      "logoHint": "Recomanat: PNG o SVG amb fons transparent. Màx. ~500 KB.",
+      "logoRequiredHint": "Puja un logo per usar el mode \"Només logo\"."
     }
   },
   "shop": {

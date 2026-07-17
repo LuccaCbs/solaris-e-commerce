@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react'
 import LanguageSelector from './LanguageSelector'
 import { getStoredUser, isAdminUser, logout } from '../utils/auth'
+import { useAppearance } from '../context/ThemeContext'
 import { categoryService } from '../api/categoryService'
 import { toImageSrc } from '../api/productImageService'
 import { Category, MenuProduct } from '../types/category'
@@ -69,6 +70,7 @@ const SubmenuProductList = ({
 
 const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHeaderProps) => {
   const { t } = useTranslation()
+  const appearance = useAppearance()
   const user = getStoredUser()
   const admin = isAdminUser(user)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -105,6 +107,15 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
     setMobileMenuOpen(false)
   }
 
+  const storeName = appearance.storeName || t('home.title')
+  const hasLogo = Boolean(appearance.logoImage)
+  const showLogo =
+    hasLogo && (appearance.brandingMode === 'LOGO' || appearance.brandingMode === 'TEXT_AND_LOGO')
+  const showName =
+    appearance.brandingMode === 'TEXT' ||
+    appearance.brandingMode === 'TEXT_AND_LOGO' ||
+    (appearance.brandingMode === 'LOGO' && !hasLogo)
+
   return (
     <header ref={headerRef} className="relative shadow-sm" style={{ backgroundColor: 'var(--color-primary)' }}>
       <style>{`
@@ -126,8 +137,22 @@ const AppHeader = ({ searchTerm = '', onSearchChange, showSearch = true }: AppHe
 
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
-          <Link to="/" className="flex-shrink-0">
-            <span className="text-2xl font-bold" style={{ color: 'var(--color-secondary)' }}>{t('home.title')}</span>
+          <Link to="/" className="flex-shrink-0 flex items-center gap-3 max-w-[220px]">
+            {showLogo && (
+              <img
+                src={toImageSrc(appearance.logoImage)}
+                alt={storeName}
+                className="h-10 w-auto max-w-[160px] object-contain"
+              />
+            )}
+            {showName && (
+              <span
+                className="text-2xl font-bold truncate"
+                style={{ color: 'var(--color-secondary)', fontFamily: 'var(--font-brand)' }}
+              >
+                {storeName}
+              </span>
+            )}
           </Link>
 
           {showSearch && onSearchChange && (

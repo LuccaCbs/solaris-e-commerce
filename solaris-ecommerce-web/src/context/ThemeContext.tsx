@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { storeConfigService } from '../api/storeConfigService'
+import { BrandingMode, loadBrandFont } from '../constants/brandFonts'
 
 export type ThemePreset = {
   id: string
@@ -57,6 +58,10 @@ type AppearanceConfig = {
   mapLatitude: string
   mapLongitude: string
   mapZoom: string
+  storeName: string
+  logoImage: string
+  brandingMode: BrandingMode
+  fontFamily: string
 }
 
 const defaultAppearance: AppearanceConfig = {
@@ -82,6 +87,10 @@ const defaultAppearance: AppearanceConfig = {
   mapLatitude: '',
   mapLongitude: '',
   mapZoom: '15',
+  storeName: 'Solaris',
+  logoImage: '',
+  brandingMode: 'TEXT',
+  fontFamily: 'PLAYFAIR_DISPLAY',
 }
 
 const ThemeContext = createContext<AppearanceConfig>(defaultAppearance)
@@ -120,6 +129,10 @@ const parseConfigList = (configs: any[] | undefined): AppearanceConfig => {
     mapLatitude: map.get('appearance.map_latitude') || '',
     mapLongitude: map.get('appearance.map_longitude') || '',
     mapZoom: map.get('appearance.map_zoom') || '15',
+    storeName: map.get('appearance.store_name') || map.get('store.name') || defaultAppearance.storeName,
+    logoImage: map.get('appearance.logo_image') || '',
+    brandingMode: (map.get('appearance.branding_mode') as BrandingMode) || defaultAppearance.brandingMode,
+    fontFamily: map.get('appearance.font_family') || defaultAppearance.fontFamily,
   }
 }
 
@@ -137,7 +150,15 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     root.style.setProperty('--color-primary', appearance.primaryColor)
     root.style.setProperty('--color-secondary', appearance.secondaryColor)
     root.style.setProperty('--color-accent', appearance.accentColor)
-  }, [appearance.primaryColor, appearance.secondaryColor, appearance.accentColor])
+    loadBrandFont(appearance.fontFamily)
+    document.title = appearance.storeName ? `${appearance.storeName} E-Commerce` : 'Solaris E-Commerce'
+  }, [
+    appearance.primaryColor,
+    appearance.secondaryColor,
+    appearance.accentColor,
+    appearance.fontFamily,
+    appearance.storeName,
+  ])
 
   return <ThemeContext.Provider value={appearance}>{children}</ThemeContext.Provider>
 }

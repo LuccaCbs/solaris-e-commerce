@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Palette, Save, RefreshCw, Upload, X, Plus, Trash2, MapPin, Search } from 'lucide-react'
+import { Palette, Save, RefreshCw, Upload, X, Plus, Trash2, MapPin, Search, Type } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { storeConfigService } from '../../api/storeConfigService'
 import { fileToBase64, toImageSrc } from '../../api/productImageService'
@@ -15,6 +15,9 @@ import { isAxiosError } from 'axios'
 import GoogleMapEmbed from '../../components/GoogleMapEmbed'
 import { hasMapLocation } from '../../utils/googleMaps'
 import { geocodeAddress } from '../../utils/geocode'
+import { BRAND_FONTS, BRANDING_MODES, BrandingMode, loadBrandFont } from '../../constants/brandFonts'
+
+type AppearanceTab = 'themes' | 'branding' | 'content'
 
 type FormData = {
   theme: string
@@ -39,6 +42,10 @@ type FormData = {
   mapLatitude: string
   mapLongitude: string
   mapZoom: string
+  storeName: string
+  logoImage: string
+  brandingMode: BrandingMode
+  fontFamily: string
 }
 
 const buildFormData = (configMap: Map<string, string>): FormData => ({
@@ -70,6 +77,10 @@ const buildFormData = (configMap: Map<string, string>): FormData => ({
   mapLatitude: configMap.get('appearance.map_latitude') || '',
   mapLongitude: configMap.get('appearance.map_longitude') || '',
   mapZoom: configMap.get('appearance.map_zoom') || '15',
+  storeName: configMap.get('appearance.store_name') || configMap.get('store.name') || 'Solaris',
+  logoImage: configMap.get('appearance.logo_image') || '',
+  brandingMode: (configMap.get('appearance.branding_mode') as BrandingMode) || 'TEXT',
+  fontFamily: configMap.get('appearance.font_family') || 'PLAYFAIR_DISPLAY',
 })
 
 const CONFIG_FIELD_KEYS: Record<string, keyof FormData | 'customThemes'> = {
@@ -96,6 +107,10 @@ const CONFIG_FIELD_KEYS: Record<string, keyof FormData | 'customThemes'> = {
   'appearance.map_latitude': 'mapLatitude',
   'appearance.map_longitude': 'mapLongitude',
   'appearance.map_zoom': 'mapZoom',
+  'appearance.store_name': 'storeName',
+  'appearance.logo_image': 'logoImage',
+  'appearance.branding_mode': 'brandingMode',
+  'appearance.font_family': 'fontFamily',
 }
 
 const AppearanceConfigPage = () => {
@@ -107,9 +122,12 @@ const AppearanceConfigPage = () => {
   })
 
   const [formData, setFormData] = useState<FormData>(() => buildFormData(new Map()))
+  const [activeTab, setActiveTab] = useState<AppearanceTab>('themes')
   const [customThemes, setCustomThemes] = useState<ThemePreset[]>([])
   const [newThemeName, setNewThemeName] = useState('')
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
+  const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null)
+  const [removeLogo, setRemoveLogo] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isGeocoding, setIsGeocoding] = useState(false)
   const hasInitialized = useRef(false)
@@ -122,6 +140,10 @@ const AppearanceConfigPage = () => {
       setCustomThemes(parseCustomThemes(map.get('appearance.custom_themes')))
     }
   }, [configs])
+
+  useEffect(() => {
+    loadBrandFont(formData.fontFamily)
+  }, [formData.fontFamily])
 
   const allThemes = [...THEME_PRESETS, ...customThemes]
 
@@ -151,6 +173,10 @@ const AppearanceConfigPage = () => {
       mapLatitude: t('admin.appearance.mapLatitude'),
       mapLongitude: t('admin.appearance.mapLongitude'),
       mapZoom: t('admin.appearance.mapZoom'),
+      storeName: t('admin.appearance.storeName'),
+      logoImage: t('admin.appearance.logo'),
+      brandingMode: t('admin.appearance.brandingMode'),
+      fontFamily: t('admin.appearance.fontFamily'),
     }
     return field ? labels[field] || configKey : configKey
   }
@@ -265,6 +291,24 @@ const AppearanceConfigPage = () => {
     setPendingFiles(pendingFiles.filter((_, i) => i !== index))
   }
 
+  const handleLogoSelect = (files: FileList | null) => {
+    if (!files?.[0]) return
+    setPendingLogoFile(files[0])
+    setRemoveLogo(false)
+  }
+
+  const handleRemoveLogo = () => {
+    setPendingLogoFile(null)
+    setRemoveLogo(true)
+    setFormData({ ...formData, logoImage: '' })
+  }
+
+  const logoPreviewSrc = pendingLogoFile
+    ? URL.createObjectURL(pendingLogoFile)
+    : formData.logoImage
+      ? toImageSrc(formData.logoImage)
+      : null
+
   const handleSave = async () => {
     setIsSaving(true)
     try {
@@ -284,7 +328,14 @@ const AppearanceConfigPage = () => {
           : theme
       )
 
-      const updates: { key: string; value: string }[] = [
+      let logoImageValue = formData.logoImage
+      if (removeLogo) {
+        logoImageValue = ''
+      } else if (pendingLogoFile) {
+        logoImageValue = await fileToBase64(pendingLogoFile)
+      }
+
+      const updates: { key: string; value: string; category?: string }[] = [
         { key: 'appearance.theme', value: formData.theme },
         { key: 'appearance.primary_color', value: formData.primaryColor },
         { key: 'appearance.secondary_color', value: formData.secondaryColor },
@@ -308,14 +359,19 @@ const AppearanceConfigPage = () => {
         { key: 'appearance.map_longitude', value: formData.mapLongitude },
         { key: 'appearance.map_zoom', value: formData.mapZoom },
         { key: 'appearance.custom_themes', value: JSON.stringify(updatedCustomThemes) },
+        { key: 'appearance.store_name', value: formData.storeName },
+        { key: 'appearance.logo_image', value: logoImageValue },
+        { key: 'appearance.branding_mode', value: formData.brandingMode },
+        { key: 'appearance.font_family', value: formData.fontFamily },
+        { key: 'store.name', value: formData.storeName, category: 'general' },
       ]
 
       const results = await Promise.allSettled(
-        updates.map(({ key, value }) =>
+        updates.map(({ key, value, category = 'appearance' }) =>
           storeConfigService.updateConfig(key, {
             configKey: key,
             configValue: value,
-            category: 'appearance',
+            category,
           })
         )
       )
@@ -341,8 +397,10 @@ const AppearanceConfigPage = () => {
       }
 
       setCustomThemes(updatedCustomThemes)
-      setFormData({ ...formData, heroImages: heroImagesBase64 })
+      setFormData({ ...formData, heroImages: heroImagesBase64, logoImage: logoImageValue })
       setPendingFiles([])
+      setPendingLogoFile(null)
+      setRemoveLogo(false)
       queryClient.invalidateQueries({ queryKey: ['store-config'] })
       toast.success(t('admin.appearance.updated'), { id: 'appearance-save-success' })
     } catch {
@@ -358,8 +416,16 @@ const AppearanceConfigPage = () => {
       setFormData(buildFormData(map))
       setCustomThemes(parseCustomThemes(map.get('appearance.custom_themes')))
       setPendingFiles([])
+      setPendingLogoFile(null)
+      setRemoveLogo(false)
     }
   }
+
+  const tabs: { id: AppearanceTab; label: string }[] = [
+    { id: 'themes', label: t('admin.appearance.tabs.themes') },
+    { id: 'branding', label: t('admin.appearance.tabs.branding') },
+    { id: 'content', label: t('admin.appearance.tabs.content') },
+  ]
 
   if (isLoading) {
     return (
@@ -399,7 +465,28 @@ const AppearanceConfigPage = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-6 border-b border-gray-200">
+          <nav className="flex gap-1 overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {activeTab === 'themes' && (
+            <>
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center gap-3 mb-6">
               <Palette className="w-6 h-6 text-gray-500" />
@@ -565,7 +652,154 @@ const AppearanceConfigPage = () => {
               </div>
             </div>
           </div>
+            </>
+          )}
 
+          {activeTab === 'branding' && (
+            <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
+              <div className="flex items-center gap-3 mb-6">
+                <Type className="w-6 h-6 text-gray-500" />
+                <h2 className="text-lg font-semibold text-gray-900">{t('admin.appearance.brandingTitle')}</h2>
+              </div>
+
+              <div
+                className="mb-6 p-4 rounded-lg border"
+                style={{ backgroundColor: formData.primaryColor }}
+              >
+                <p className="text-xs font-medium text-gray-600 mb-2">{t('admin.appearance.brandingPreview')}</p>
+                <div className="flex items-center gap-3">
+                  {(formData.brandingMode === 'LOGO' || formData.brandingMode === 'TEXT_AND_LOGO') && logoPreviewSrc && (
+                    <img src={logoPreviewSrc} alt={formData.storeName} className="h-10 max-w-[160px] object-contain" />
+                  )}
+                  {(formData.brandingMode === 'TEXT' ||
+                    formData.brandingMode === 'TEXT_AND_LOGO' ||
+                    (formData.brandingMode === 'LOGO' && !logoPreviewSrc)) && (
+                    <span
+                      className="text-2xl font-bold"
+                      style={{ color: formData.secondaryColor, fontFamily: 'var(--font-brand)' }}
+                    >
+                      {formData.storeName || t('home.title')}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('admin.appearance.storeName')}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.storeName}
+                      onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
+                      placeholder={t('admin.appearance.storeNamePlaceholder')}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('admin.appearance.fontFamily')}
+                    </label>
+                    <select
+                      value={formData.fontFamily}
+                      onChange={(e) => {
+                        const fontFamily = e.target.value
+                        setFormData({ ...formData, fontFamily })
+                        loadBrandFont(fontFamily)
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    >
+                      {BRAND_FONTS.map((font) => (
+                        <option key={font.id} value={font.id}>
+                          {font.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p
+                      className="mt-2 text-xl font-semibold"
+                      style={{ fontFamily: 'var(--font-brand)', color: formData.secondaryColor }}
+                    >
+                      {formData.storeName || t('home.title')}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('admin.appearance.brandingMode')}
+                    </label>
+                    <div className="space-y-2">
+                      {BRANDING_MODES.map((mode) => (
+                        <label key={mode} className="flex items-center gap-2 text-sm text-gray-700">
+                          <input
+                            type="radio"
+                            name="brandingMode"
+                            value={mode}
+                            checked={formData.brandingMode === mode}
+                            onChange={() => setFormData({ ...formData, brandingMode: mode })}
+                            className="w-4 h-4"
+                          />
+                          {t(`admin.appearance.brandingModes.${mode}`)}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('admin.appearance.logo')}
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleLogoSelect(e.target.files)}
+                    className="hidden"
+                    id="brand-logo-upload"
+                  />
+                  <label
+                    htmlFor="brand-logo-upload"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition cursor-pointer"
+                  >
+                    <Upload className="w-4 h-4" />
+                    {t('admin.appearance.uploadLogo')}
+                  </label>
+                  <p className="text-xs text-gray-500 mt-2">{t('admin.appearance.logoHint')}</p>
+
+                  {logoPreviewSrc && (
+                    <div className="mt-4 relative inline-block">
+                      <div className="p-4 border rounded-lg bg-gray-50">
+                        <img
+                          src={logoPreviewSrc}
+                          alt={formData.storeName}
+                          className="max-h-24 max-w-[220px] object-contain"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveLogo}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
+                        title={t('admin.appearance.removeLogo')}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
+                  {formData.brandingMode === 'LOGO' && !logoPreviewSrc && (
+                    <p className="mt-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                      {t('admin.appearance.logoRequiredHint')}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'content' && (
+            <>
           <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
               <Palette className="w-6 h-6 text-gray-500" />
@@ -875,6 +1109,8 @@ const AppearanceConfigPage = () => {
               </div>
             </div>
           </div>
+            </>
+          )}
         </div>
       </main>
     </div>

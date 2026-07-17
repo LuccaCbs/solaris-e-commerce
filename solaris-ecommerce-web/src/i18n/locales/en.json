@@ -384,7 +384,28 @@
       "mapGeocodeSuccess": "Location found",
       "mapGeocodeNotFound": "Address not found",
       "mapGeocodeError": "Error searching location",
-      "contactInfo": "Contact information"
+      "contactInfo": "Contact information",
+      "tabs": {
+        "themes": "Themes & colors",
+        "branding": "Brand identity",
+        "content": "Site content"
+      },
+      "brandingTitle": "Brand identity",
+      "brandingPreview": "Header preview",
+      "storeName": "Store name",
+      "storeNamePlaceholder": "E.g. My Store",
+      "fontFamily": "Store name typography",
+      "brandingMode": "Display in header",
+      "brandingModes": {
+        "TEXT": "Store name only",
+        "LOGO": "Logo only (hide name)",
+        "TEXT_AND_LOGO": "Logo and name"
+      },
+      "logo": "Store logo",
+      "uploadLogo": "Upload logo",
+      "removeLogo": "Remove logo",
+      "logoHint": "Recommended: PNG or SVG with transparent background. Max ~500 KB.",
+      "logoRequiredHint": "Upload a logo to use \"Logo only\" mode."
     }
   },
   "shop": {
